@@ -85,7 +85,7 @@ public:
 	void OnMapDataRecieved(FMapData MapData);
 	void SetTexture();
 	static UTexture2D* ColorArrayToTexture(TArray<FColor> colors);
-	static UTexture2D* FloatArrayToTexture(TArray<float> heights);
+	static UTexture2D* FloatArrayToTexture(TArray<float> convertArray);
 
 	void UpdateTerrainChunk();
 

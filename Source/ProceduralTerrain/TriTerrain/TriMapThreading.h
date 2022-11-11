@@ -51,6 +51,8 @@ struct FTriTerrainType {
 
 	UPROPERTY(EditAnywhere, meta = (ClampMin = "0.0", ClampMax = "1.0", UIMin = "0.0", UIMax = "1.0"))
 		float height;
+	UPROPERTY(EditAnywhere, meta = (ClampMin = "0.0", ClampMax = "1.0", UIMin = "0.0", UIMax = "1.0"))
+		float blend;
 	UPROPERTY(EditAnywhere)
 		FColor color;
 };

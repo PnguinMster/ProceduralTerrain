@@ -116,9 +116,9 @@ UTexture2D* ATriChunk::ColorArrayToTexture(TArray<FColor> colors)
 	return texture;
 }
 
-UTexture2D* ATriChunk::FloatArrayToTexture(TArray<float> heights)
+UTexture2D* ATriChunk::FloatArrayToTexture(TArray<float> convertArray)
 {
-	UTexture2D* texture = UTexture2D::CreateTransient(heights.Num(), 1, PF_R32_FLOAT);
+	UTexture2D* texture = UTexture2D::CreateTransient(convertArray.Num(), 1, PF_R32_FLOAT);
 
 	if (!texture) return nullptr;
 #if WITH_EDITORONLY_DATA
@@ -129,7 +129,7 @@ UTexture2D* ATriChunk::FloatArrayToTexture(TArray<float> heights)
 	texture->LODGroup = TextureGroup::TEXTUREGROUP_Pixels2D;
 	FTexture2DMipMap& Mip = texture->GetPlatformData()->Mips[0];
 	void* Data = Mip.BulkData.Lock(LOCK_READ_WRITE);
-	FMemory::Memcpy(Data, heights.GetData(), heights.Num() * 4);
+	FMemory::Memcpy(Data, convertArray.GetData(), convertArray.Num() * 4);
 	Mip.BulkData.Unlock();
 	texture->UpdateResource();
 	return texture;
@@ -141,15 +141,19 @@ void ATriChunk::SetTexture()
 	int regionsCount = terrainGen->mapThread->regions.Num();
 	TArray<FColor> colors;
 	TArray<float> heights;
+	TArray<float> blends;
 	colors.SetNum(regionsCount);
 	heights.SetNum(regionsCount);
+	blends.SetNum(regionsCount);
 	for (int i = 0; i < regionsCount; i++) {
 		colors[i] = terrainGen->mapThread->regions[i].color;
 		heights[i] = terrainGen->mapThread->regions[i].height;
+		blends[i] = terrainGen->mapThread->regions[i].blend;
 	}
 
 	UTexture2D* colorTexture = ColorArrayToTexture(colors);
 	UTexture2D* heightTexture = FloatArrayToTexture(heights);
+	UTexture2D* blendTexture = FloatArrayToTexture(blends);
 
 	UMaterialInstanceDynamic* dynamicMaterialInstance = UMaterialInstanceDynamic::Create(terrainGen->materialInterface, meshObject->GetOwner());
 	dynamicMaterialInstance->SetScalarParameterValue("MinHeight", terrainGen->mapThread->meshSettings->GetMinHeight());
@@ -157,6 +161,8 @@ void ATriChunk::SetTexture()
 	dynamicMaterialInstance->SetScalarParameterValue("RegionCount", regionsCount);
 	dynamicMaterialInstance->SetTextureParameterValue("ColorTexture", colorTexture);
 	dynamicMaterialInstance->SetTextureParameterValue("HeightTexture", heightTexture);
+	dynamicMaterialInstance->SetTextureParameterValue("BlendTexture", blendTexture);
+
 	meshObject->SetMaterial(0, dynamicMaterialInstance);
 }
 
