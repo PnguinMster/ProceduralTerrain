@@ -8,7 +8,7 @@
 #include "ProceduralMeshComponent.h"
 #include "TriMapThreading.generated.h"
 
-DECLARE_DELEGATE_OneParam(FMapReceived, FMapData);
+DECLARE_DELEGATE_OneParam(FMapReceived, FTri_HeightMap);
 DECLARE_DELEGATE_OneParam(FMeshReceived, UTriMeshData*);
 
 UENUM(BlueprintType)
@@ -30,18 +30,20 @@ struct FMapThreadInfo
 };
 
 USTRUCT()
-struct FMapData
+struct FTri_HeightMap
 {
 	GENERATED_BODY()
 
 public:
-	TArray<TArray<float>> noiseMap;
-	//TArray<uint8> color;
+	TArray<TArray<float>> values;
+	float minValue;
+	float maxValue;
 
-	FMapData() {};
-	FMapData(TArray<TArray<float>> values) {
-		this->noiseMap = values;
-		//this->color = color;
+	FTri_HeightMap() {};
+	FTri_HeightMap(TArray<TArray<float>> values, float minValue, float maxValue) {
+		this->values = values;
+		this->minValue = minValue;
+		this->maxValue = maxValue;
 	}
 };
 
@@ -63,11 +65,6 @@ class PROCEDURALTERRAIN_API ATriMapThreading : public AActor
 	GENERATED_BODY()
 	
 public:	
-	UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "1.0", UIMin = "1.0"))
-		int mapChunkSize = 95;
-	UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "0.0", ClampMax = "6.0", UIMin = "0.0", UIMax = "6.0"))
-		int editorPreviewLOD;
-
 	UPROPERTY(EditDefaultsOnly)
 		UTriHeightMapSettings* heightMapSettings;
 	UPROPERTY(EditDefaultsOnly)
@@ -80,7 +77,7 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 		ETriDrawMode drawMode = ETriDrawMode::ColorMap;
 
-	TQueue<FMapThreadInfo<FMapData>> mapDataThreadInfoQueue;
+	TQueue<FMapThreadInfo<FTri_HeightMap>> mapDataThreadInfoQueue;
 	TQueue<FMapThreadInfo<UTriMeshData*>> meshDataThreadInfoQueue;
 
 	// Sets default values for this actor's properties
@@ -97,9 +94,8 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	FMapData GenerateMapData(FVector2D center);
 	void DrawMapInEditor();
 
-	void RequestMapData(FVector2D center, FMapReceived* callback);
-	void RequestMeshData(FMapData mapData, int lod, FMeshReceived* callback);
+	void RequestHeightData(FVector2D center, FMapReceived* callback);
+	void RequestMeshData(FTri_HeightMap heightMap, int lod, FMeshReceived* callback);
 };

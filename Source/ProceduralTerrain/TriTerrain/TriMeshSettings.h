@@ -11,12 +11,9 @@ class PROCEDURALTERRAIN_API UTriMeshSettings : public UDataAsset
 	
 public:
 	UPROPERTY(EditDefaultsOnly)
-		float unformScale = 10.f;
-	UPROPERTY(EditDefaultsOnly)
-		float meshHeightMultiplier = 5.f;
-	UPROPERTY(EditDefaultsOnly)
-		UCurveFloat* meshHeightCurve;
+		float meshScale = 10.f;
+	UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "1.0", UIMin = "1.0"))
+		int numVertsPerLine = 95;
 
-	float GetMinHeight();
-	float GetMaxHeight();
+	float GetMeshWorldSize();
 };

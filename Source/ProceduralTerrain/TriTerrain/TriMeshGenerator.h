@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "TriMeshSettings.h"
 #include "ProceduralMeshComponent.h"
 #include "TriMeshGenerator.generated.h"
 
@@ -33,5 +34,5 @@ public:
 class PROCEDURALTERRAIN_API TriMeshGenerator
 {
 public:
-	static UTriMeshData* GenerateTerrainMesh(TArray<TArray<float>> heightMap, float heightMultiplier, UCurveFloat* heightCurve, int levelOfDetail);
+	static UTriMeshData* GenerateTerrainMesh(TArray<TArray<float>> heightMap, UTriMeshSettings* meshSettings, int levelOfDetail);
 };

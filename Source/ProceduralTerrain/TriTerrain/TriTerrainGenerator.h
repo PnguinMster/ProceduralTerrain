@@ -43,10 +43,10 @@ public:
 
 	FVector2D viewerPosition;
 	FVector2D viewerPositionOld;
-	int chunkSize;
+	float meshWorldSize;
 	int chunksVisibleInViewDist;
 	TMap<FVector2D, ATriChunk*> terrainChunkMap;
-	TArray<ATriChunk*> terrainChunksVisibleLastUpdate;
+	TArray<ATriChunk*> visibleTerrainChunks;
 
 	APawn* ViewerPawn;
 
@@ -66,14 +66,16 @@ class PROCEDURALTERRAIN_API ATriChunk : public AActor
 	GENERATED_BODY()
 
 public:
+	FVector2D coord; 
 	UProceduralMeshComponent* meshObject;
 	ATriTerrainGenerator* terrainGen;
+	FVector2D sampleCenter;
 	FVector2D position;
 	FMapReceived MapRecievedDelegate;
 	FVoidDelegate UpdateChunkDelegate;
 
 	TArray<UTriLODMesh*> lodMeshes;
-	FMapData mapData;
+	FTri_HeightMap mapData;
 	bool mapDataRecieved;
 	int previousLODIndex = -1;
 
@@ -81,8 +83,8 @@ public:
 	// Sets default values for this actor's properties
 	ATriChunk();
 
-	void Initialize(FVector2D coord, int size, ATriTerrainGenerator* actor);
-	void OnMapDataRecieved(FMapData MapData);
+	void Initialize(FVector2D Coord, float MeshWorldSize, ATriTerrainGenerator* actor);
+	void OnMapDataRecieved(FTri_HeightMap MapData);
 	void SetTexture();
 	static UTexture2D* ColorArrayToTexture(TArray<FColor> colors);
 	static UTexture2D* FloatArrayToTexture(TArray<float> convertArray);
@@ -109,5 +111,5 @@ public:
 	UTriLODMesh();
 	void Initialize(int Lod, FVoidDelegate* UpdateCallback, ATriMapThreading* MapThread);
 	void OnMeshDataRecieved(UTriMeshData* meshData);
-	void RequestMesh(FMapData mapData);
+	void RequestMesh(FTri_HeightMap mapData);
 };

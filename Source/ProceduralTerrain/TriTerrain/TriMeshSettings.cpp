@@ -1,11 +1,6 @@
 #include "TriMeshSettings.h"
 
-float UTriMeshSettings::GetMinHeight()
+float UTriMeshSettings::GetMeshWorldSize()
 {
-	return unformScale * meshHeightMultiplier * meshHeightCurve->GetFloatValue(0);
-}
-
-float UTriMeshSettings::GetMaxHeight()
-{
-	return unformScale * meshHeightMultiplier * meshHeightCurve->GetFloatValue(1);
+	return (numVertsPerLine - 3) * meshScale;
 }

@@ -12,9 +12,9 @@ void ATriTerrainGenerator::BeginPlay()
 {
 	Super::BeginPlay();
 
-	chunkSize = (mapThread->mapChunkSize - 1);
+	meshWorldSize = mapThread->meshSettings->GetMeshWorldSize();
 	chunksVisibleInViewDist = detailLevels[detailLevels.Num() - 1].visibleChunks;
-	maxViewDist = chunksVisibleInViewDist * chunkSize;
+	maxViewDist = chunksVisibleInViewDist * meshWorldSize;
 	ViewerPawn = GetWorld()->GetFirstPlayerController()->GetPawn();
 	UpdateVisibleChunk();
 }
@@ -24,7 +24,7 @@ void ATriTerrainGenerator::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	viewerPosition.Set(ViewerPawn->GetActorLocation().X / mapThread->meshSettings->unformScale, ViewerPawn->GetActorLocation().Y / mapThread->meshSettings->unformScale);
+	viewerPosition.Set(ViewerPawn->GetActorLocation().X, ViewerPawn->GetActorLocation().Y);
 
 	if ((viewerPositionOld - viewerPosition).SizeSquared() > sqrViewerMoveThresholdForChunkUpdate) {
 		viewerPositionOld = viewerPosition;
@@ -34,30 +34,33 @@ void ATriTerrainGenerator::Tick(float DeltaTime)
 
 void ATriTerrainGenerator::UpdateVisibleChunk()
 {
-	for (int i = 0; i < terrainChunksVisibleLastUpdate.Num(); i++) {
-		terrainChunksVisibleLastUpdate[i]->SetVisible(false);
+	TSet<FVector2D> alreadyUpdateChunkCoords;
+	for (int i = visibleTerrainChunks.Num() - 1; i >= 0 ; i--) {
+		alreadyUpdateChunkCoords.Add(visibleTerrainChunks[i]->coord);
+		visibleTerrainChunks[i]->UpdateTerrainChunk();
 	}
-	terrainChunksVisibleLastUpdate.Empty();
 
-	int currentChunkCoordX = FMath::RoundToInt(viewerPosition.X / chunkSize);
-	int currentChunkCoordY = FMath::RoundToInt(viewerPosition.Y / chunkSize);
+	int currentChunkCoordX = FMath::RoundToInt(viewerPosition.X / meshWorldSize);
+	int currentChunkCoordY = FMath::RoundToInt(viewerPosition.Y / meshWorldSize);
 
 	for (int yOffset = -chunksVisibleInViewDist; yOffset <= chunksVisibleInViewDist; yOffset++) {
 		for (int xOffset = -chunksVisibleInViewDist; xOffset <= chunksVisibleInViewDist; xOffset++) {
 			FVector2D viewedChunkCoord = FVector2D(currentChunkCoordX + xOffset, currentChunkCoordY + yOffset);
 
-			if (terrainChunkMap.Contains(viewedChunkCoord)) {
-				terrainChunkMap[viewedChunkCoord]->UpdateTerrainChunk();
-			}
-			else {
-				const FTransform SpawnLocAndRotation;
-				//Delay Actor Spawning to call appropriate functions first
-				ATriChunk* chunk = GetWorld()->SpawnActorDeferred<ATriChunk>(ATriChunk::StaticClass(), SpawnLocAndRotation);
-				chunk->Initialize(viewedChunkCoord, chunkSize, this);
-				terrainChunkMap.Add(viewedChunkCoord, chunk);
-				//Spawn Actor
-				chunk->FinishSpawning(SpawnLocAndRotation);
-				chunk->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
+			if (!alreadyUpdateChunkCoords.Contains(viewedChunkCoord)) {
+				if (terrainChunkMap.Contains(viewedChunkCoord)) {
+					terrainChunkMap[viewedChunkCoord]->UpdateTerrainChunk();
+				}
+				else {
+					const FTransform SpawnLocAndRotation;
+					//Delay Actor Spawning to call appropriate functions first
+					ATriChunk* chunk = GetWorld()->SpawnActorDeferred<ATriChunk>(ATriChunk::StaticClass(), SpawnLocAndRotation);
+					chunk->Initialize(viewedChunkCoord, meshWorldSize, this);
+					terrainChunkMap.Add(viewedChunkCoord, chunk);
+					//Spawn Actor
+					chunk->FinishSpawning(SpawnLocAndRotation);
+					chunk->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
+				}
 			}
 		}
 	}
@@ -73,7 +76,7 @@ ATriChunk::ATriChunk()
 	RootComponent = meshObject;
 }
 
-void ATriChunk::Initialize(FVector2D coord, int size, ATriTerrainGenerator* actor)
+void ATriChunk::Initialize(FVector2D Coord, float MeshWorldSize, ATriTerrainGenerator* actor)
 {
 	//DO NOT put in constructor
 	//It Will Break
@@ -81,11 +84,12 @@ void ATriChunk::Initialize(FVector2D coord, int size, ATriTerrainGenerator* acto
 	UpdateChunkDelegate.BindUObject(this, &ATriChunk::UpdateTerrainChunk);
 
 	terrainGen = actor;
-	position = coord * size;
-	FVector positionV3 = FVector(position.X, position.Y, 0) * actor->mapThread->meshSettings->unformScale;
+	sampleCenter = Coord * MeshWorldSize / actor->mapThread->meshSettings->meshScale;
+	coord = Coord;
+	FVector positionV3 = FVector(Coord.X, Coord.Y, 0) * MeshWorldSize;
+	position = Coord * MeshWorldSize;
 
 	meshObject->SetWorldLocation(positionV3);
-	meshObject->SetRelativeScale3D(FVector::OneVector * actor->mapThread->meshSettings->unformScale);
 	SetVisible(false);
 
 	lodMeshes.SetNum(actor->detailLevels.Num());
@@ -94,7 +98,8 @@ void ATriChunk::Initialize(FVector2D coord, int size, ATriTerrainGenerator* acto
 		lodMeshes[i]->Initialize(actor->detailLevels[i].lod, &UpdateChunkDelegate, actor->mapThread);
 	}
 
-	terrainGen->mapThread->RequestMapData(position, &MapRecievedDelegate);
+	SetTexture();
+	terrainGen->mapThread->RequestHeightData(sampleCenter, &MapRecievedDelegate);
 }
 
 UTexture2D* ATriChunk::ColorArrayToTexture(TArray<FColor> colors)
@@ -156,8 +161,8 @@ void ATriChunk::SetTexture()
 	UTexture2D* blendTexture = FloatArrayToTexture(blends);
 
 	UMaterialInstanceDynamic* dynamicMaterialInstance = UMaterialInstanceDynamic::Create(terrainGen->materialInterface, meshObject->GetOwner());
-	dynamicMaterialInstance->SetScalarParameterValue("MinHeight", terrainGen->mapThread->meshSettings->GetMinHeight());
-	dynamicMaterialInstance->SetScalarParameterValue("MaxHeight", terrainGen->mapThread->meshSettings->GetMaxHeight());
+	dynamicMaterialInstance->SetScalarParameterValue("MinHeight", terrainGen->mapThread->heightMapSettings->GetMinHeight());
+	dynamicMaterialInstance->SetScalarParameterValue("MaxHeight", terrainGen->mapThread->heightMapSettings->GetMaxHeight());
 	dynamicMaterialInstance->SetScalarParameterValue("RegionCount", regionsCount);
 	dynamicMaterialInstance->SetTextureParameterValue("ColorTexture", colorTexture);
 	dynamicMaterialInstance->SetTextureParameterValue("HeightTexture", heightTexture);
@@ -166,12 +171,11 @@ void ATriChunk::SetTexture()
 	meshObject->SetMaterial(0, dynamicMaterialInstance);
 }
 
-void ATriChunk::OnMapDataRecieved(FMapData MapData)
+void ATriChunk::OnMapDataRecieved(FTri_HeightMap MapData)
 {
 	mapData = MapData;
 	mapDataRecieved = true;
 
-	SetTexture();
 	UpdateTerrainChunk();
 }
 
@@ -181,14 +185,14 @@ void ATriChunk::UpdateTerrainChunk()
 		return;
 	}
 
-	//float viewerDistFromNearestChunk = FVector::DistSquared(FVector(position.X, position.Y, 0), terrainGen->viewerPosition);
 	float viewerDistFromNearestChunk = FVector2D::Distance(position, terrainGen->viewerPosition);
+	bool wassVisible = IsVisible();
 	bool visible = viewerDistFromNearestChunk <= terrainGen->maxViewDist;
 
 	if (visible) {
 		int lodIndex = 0;
 		for (int i = 0; i < terrainGen->detailLevels.Num() - 1; i++) {
-			if (viewerDistFromNearestChunk > terrainGen->detailLevels[i].visibleChunks * terrainGen->chunkSize)
+			if (viewerDistFromNearestChunk > terrainGen->detailLevels[i].visibleChunks * terrainGen->meshWorldSize)
 				lodIndex = i + 1;
 			else {
 				break;
@@ -204,10 +208,17 @@ void ATriChunk::UpdateTerrainChunk()
 				lodMesh->RequestMesh(mapData);
 			}
 		}
-
-		terrainGen->terrainChunksVisibleLastUpdate.Add(this);
 	}
-	SetVisible(visible);
+
+	if (wassVisible != visible) {
+		if (visible) {
+			terrainGen->visibleTerrainChunks.Add(this);
+		}
+		else {
+			terrainGen->visibleTerrainChunks.Remove(this);
+		}
+		SetVisible(visible);
+	}
 }
 
 /**********
@@ -239,7 +250,7 @@ void UTriLODMesh::OnMeshDataRecieved(UTriMeshData* meshData)
 	updateCallback->Execute();
 }
 
-void UTriLODMesh::RequestMesh(FMapData mapData)
+void UTriLODMesh::RequestMesh(FTri_HeightMap mapData)
 {
 	hasRequestedmesh = true;
 	mapThread->RequestMeshData(mapData, lod, &meshDataRecieved);

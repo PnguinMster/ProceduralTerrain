@@ -8,7 +8,7 @@ ABlockChunk::ABlockChunk() {
 
 	//Assign Material
 	// Load the base material from your created material. 
-	static ConstructorHelpers::FObjectFinder<UMaterial>asset(TEXT("/Game/Blueprints/BlockTerrain/Assets/MAT_BlockTerrain"));
+	static ConstructorHelpers::FObjectFinder<UMaterial>asset(TEXT("/Game/Materials/MAT_BlockTerrain"));
 	dynamicMaterial = asset.Object;
 }
 

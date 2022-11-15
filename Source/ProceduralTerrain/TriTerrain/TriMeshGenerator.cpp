@@ -74,7 +74,7 @@ void UTriMeshData::CreateMesh(UProceduralMeshComponent* mesh)
 }
 
 
-UTriMeshData* TriMeshGenerator::GenerateTerrainMesh(TArray<TArray<float>> heightMap, float heightMultiplier, UCurveFloat* heightCurve, int levelOfDetail)
+UTriMeshData* TriMeshGenerator::GenerateTerrainMesh(TArray<TArray<float>> heightMap, UTriMeshSettings* meshSettings, int levelOfDetail)
 {
 	int meshSimplificaiton = (levelOfDetail == 0) ? 1 : levelOfDetail * 2;
 	int borderedSize = heightMap.Num();
@@ -115,8 +115,8 @@ UTriMeshData* TriMeshGenerator::GenerateTerrainMesh(TArray<TArray<float>> height
 		for (int x = 0; x < borderedSize; x+=meshSimplificaiton) {
 			int vertexIndex = vertexIndexMap[x][y];
 			FVector2D percent = FVector2D((x - meshSimplificaiton) / (float)meshSize, (y - meshSimplificaiton) / (float)meshSize);
-			float height = heightCurve->GetFloatValue(heightMap[x][y]) * heightMultiplier;
-			FVector vertexPosition = FVector(topLeftX + percent.X * meshSizeUnsimplified, topLeftY - percent.Y * meshSizeUnsimplified, height);
+			float height = heightMap[x][y];
+			FVector vertexPosition = FVector(topLeftX + percent.X * meshSizeUnsimplified, topLeftY - percent.Y * meshSizeUnsimplified, height) * meshSettings->meshScale;
 
 			meshData->AddVertex(vertexPosition, percent, vertexIndex);
 
