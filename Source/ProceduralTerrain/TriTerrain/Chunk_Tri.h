@@ -51,7 +51,7 @@ public:
 	UMaterialInterface* materialInterface;
 	TArray<AChunk_Tri*>* visibleTerrainChunks;
 
-	void Initialize(FVector2D Coord, float MeshWorldSize, ATriMapThreading* actor, TArray<FTriLODInfo>* DetailLevels, float MaxViewDist, UMaterialInterface* MaterialInterface, FVector2D* ViewerPosition, TArray<AChunk_Tri*>* VisibleTerrainChunks);
+	void Initialize(FVector2D Coord, float MeshWorldSize, ATriMapThreading* actor, TArray<FTriLODInfo>& DetailLevels, float MaxViewDist, UMaterialInterface* MaterialInterface, FVector2D& ViewerPosition, TArray<AChunk_Tri*>* VisibleTerrainChunks);
 	void OnHeightMapRecieved(UObject* heightMapObject);
 	void SetTexture();
 	static UTexture2D* ColorArrayToTexture(TArray<FColor> colors);

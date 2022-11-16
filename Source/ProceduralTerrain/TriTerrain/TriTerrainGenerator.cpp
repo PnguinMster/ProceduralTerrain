@@ -55,7 +55,7 @@ void ATriTerrainGenerator::UpdateVisibleChunk()
 					const FTransform SpawnLocAndRotation;
 					//Delay Actor Spawning to call appropriate functions first
 					AChunk_Tri* chunk = GetWorld()->SpawnActorDeferred<AChunk_Tri>(AChunk_Tri::StaticClass(), SpawnLocAndRotation);
-					chunk->Initialize(viewedChunkCoord, meshWorldSize, mapThread, &detailLevels, maxViewDist, materialInterface, &viewerPosition, &visibleTerrainChunks);
+					chunk->Initialize(viewedChunkCoord, meshWorldSize, mapThread, detailLevels, maxViewDist, materialInterface, viewerPosition, &visibleTerrainChunks);
 					terrainChunkMap.Add(viewedChunkCoord, chunk);
 					//Spawn Actor
 					chunk->FinishSpawning(SpawnLocAndRotation);

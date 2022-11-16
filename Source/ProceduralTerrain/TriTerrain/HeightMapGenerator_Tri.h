@@ -7,5 +7,5 @@
 class PROCEDURALTERRAIN_API HeightMapGenerator_Tri
 {
 public:
-	static UTri_HeightMap* GenerateHeightMap(int width, int height, UTriHeightMapSettings* settings, FVector2D sampleCenter);
+	static UTri_HeightMap* GenerateHeightMap(int width, int height, UTriHeightMapSettings* heightSettings, FVector2D sampleCenter);
 };

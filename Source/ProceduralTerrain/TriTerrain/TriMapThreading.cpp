@@ -54,20 +54,6 @@ void ATriMapThreading::Tick(float DeltaTime)
 	*/
 }
 
-void ATriMapThreading::DrawMapInEditor()
-{
-	UTri_HeightMap* mapData = HeightMapGenerator_Tri::GenerateHeightMap(meshSettings->numVertsPerLine, meshSettings->numVertsPerLine, heightMapSettings, FVector2D::ZeroVector);
-
-	UTriMeshData* meshData = TriMeshGenerator::GenerateTerrainMesh(mapData->values, meshSettings, 0);
-	meshData->CreateMesh(terrainMesh);
-	/*
-	//Add Texture to Material
-	UMaterialInstanceDynamic* dynamicMaterialInstance = UMaterialInstanceDynamic::Create(dynamicMaterial, terrainMesh->GetOwner());
-	dynamicMaterialInstance->SetTextureParameterValue("ChunkTexture", texture2D);
-	terrainMesh->SetMaterial(0, dynamicMaterialInstance);
-	*/
-}
-
 void ATriMapThreading::RequestData(TFunction<UObject* (void)> generateData, FDataRecieved* callback)
 {
 	AsyncTask(ENamedThreads::AnyHiPriThreadNormalTask, [generateData, callback, this]() {

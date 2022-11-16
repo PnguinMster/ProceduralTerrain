@@ -8,7 +8,7 @@ AChunk_Tri::AChunk_Tri()
 	UpdateChunkDelegate.BindUObject(this, &AChunk_Tri::UpdateTerrainChunk);
 }
 
-void AChunk_Tri::Initialize(FVector2D Coord, float MeshWorldSize, ATriMapThreading* actor, TArray<FTriLODInfo>* DetailLevels, float MaxViewDist, UMaterialInterface* MaterialInterface, FVector2D* ViewerPosition, TArray<AChunk_Tri*>* VisibleTerrainChunks)
+void AChunk_Tri::Initialize(FVector2D Coord, float MeshWorldSize, ATriMapThreading* actor, TArray<FTriLODInfo>& DetailLevels, float MaxViewDist, UMaterialInterface* MaterialInterface, FVector2D& ViewerPosition, TArray<AChunk_Tri*>* VisibleTerrainChunks)
 {
 	//DO NOT put in constructor
 	//It Will Break
@@ -19,13 +19,13 @@ void AChunk_Tri::Initialize(FVector2D Coord, float MeshWorldSize, ATriMapThreadi
 	coord = Coord;
 	FVector positionV3 = FVector(Coord.X, Coord.Y, 0) * MeshWorldSize;
 	position = Coord * MeshWorldSize;
+	meshWorldSize = MeshWorldSize;
 	maxViewDist = MaxViewDist;
 	materialInterface = MaterialInterface;
-	viewerPosition = ViewerPosition;
+	viewerPosition = &ViewerPosition;
 	visibleTerrainChunks = VisibleTerrainChunks;
-	detailLevels = DetailLevels;
+	detailLevels = &DetailLevels;
 
-	meshObject->SetWorldLocation(positionV3);
 	SetVisible(false);
 
 	lodMeshes.SetNum((*detailLevels).Num());
@@ -36,6 +36,7 @@ void AChunk_Tri::Initialize(FVector2D Coord, float MeshWorldSize, ATriMapThreadi
 
 	SetTexture();
 
+	meshObject->SetWorldLocation(positionV3);
 	TFunction<UObject* (void)> function = [=]() {return HeightMapGenerator_Tri::GenerateHeightMap(mapThread->meshSettings->numVertsPerLine, mapThread->meshSettings->numVertsPerLine, mapThread->heightMapSettings, sampleCenter); };
 	mapThread->RequestData(function, &DataRecievedDelegate);
 }
@@ -127,7 +128,6 @@ void AChunk_Tri::UpdateTerrainChunk()
 
 		if (visible) {
 			int lodIndex = 0;
-
 			for (int i = 0; i < (*detailLevels).Num() - 1; i++) {
 				if (viewerDistFromNearestChunk > (*detailLevels)[i].visibleChunks * meshWorldSize)
 					lodIndex = i + 1;
@@ -136,7 +136,6 @@ void AChunk_Tri::UpdateTerrainChunk()
 			}
 
 			if (lodIndex != previousLODIndex) {
-				UE_LOG(LogTemp, Warning, TEXT("The integer value is: %d"), lodIndex);
 				UTriLODMesh* lodMesh = lodMeshes[lodIndex];
 				if (lodMesh->hasMesh) {
 					previousLODIndex = lodIndex;
@@ -153,20 +152,20 @@ void AChunk_Tri::UpdateTerrainChunk()
 				visibleTerrainChunks->Add(this);
 			else 
 				visibleTerrainChunks->Remove(this);
-
-			SetVisible(visible);
 		}
+
+		SetVisible(visible);
 	}
 }
 
 UTriLODMesh::UTriLODMesh()
 {
 	mesh = CreateDefaultSubobject<UProceduralMeshComponent>(TEXT("Mesh"));
+	meshDataRecieved.BindUObject(this, &UTriLODMesh::OnMeshDataRecieved);
 }
 
 void UTriLODMesh::Initialize(int Lod, FVoidDelegate* UpdateCallback, ATriMapThreading* MapThread)
 {
-	meshDataRecieved.BindUObject(this, &UTriLODMesh::OnMeshDataRecieved);
 	lod = Lod;
 	mapThread = MapThread;
 	updateCallback = UpdateCallback;
@@ -182,8 +181,8 @@ void UTriLODMesh::OnMeshDataRecieved(UObject* meshDataObject)
 
 void UTriLODMesh::RequestMesh(UTri_HeightMap* heightMap, UTriMeshSettings* meshSettings)
 {
-	hasRequestedmesh = true;
 	TFunction<UObject* (void)> function = [=]() { return TriMeshGenerator::GenerateTerrainMesh(heightMap->values, meshSettings, lod); };
+	hasRequestedmesh = true;
 
 	mapThread->RequestData(function, &meshDataRecieved);
 }

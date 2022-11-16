@@ -97,7 +97,5 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	void DrawMapInEditor();
-
 	void RequestData(TFunction<UObject* (void)> generateData, FDataRecieved* callback);
 };
