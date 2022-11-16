@@ -13,7 +13,7 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 		float meshScale = 10.f;
 	UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "1.0", UIMin = "1.0"))
-		int numVertsPerLine = 95;
+		int numVertsPerLine = 77;
 
 	float GetMeshWorldSize();
 };

@@ -16,15 +16,15 @@ class PROCEDURALTERRAIN_API UTriMeshData : public UObject
 	TArray<FVector2D>UVs;
 	TArray<FVector>Normals;
 
-	TArray<FVector> borderVertices;
-	TArray<int> borderTriangles;
+	TArray<FVector> outOfMeshVertices;
+	TArray<int> outOfMeshTraingles;
 
-	int triangleIndex;
+	int outOfMeshTriangleIndex;
 	int borderTriangleIndex;
 public:
 
 	UTriMeshData() {}
-	void Initialize(int verticesPerLine);
+	void Initialize(int verticesPerLine, int skipCount);
 	void AddVertex(FVector vertexPosition, FVector2D uv, int vertexIndex);
 	void AddTraingle(int a, int b, int c);
 	void FlatShading();

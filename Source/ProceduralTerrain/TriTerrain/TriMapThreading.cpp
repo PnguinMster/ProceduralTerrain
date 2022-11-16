@@ -34,8 +34,14 @@ void ATriMapThreading::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (!dataQueue.IsEmpty()) {
+		FThreadInfo threadInfo;
+		dataQueue.Dequeue(threadInfo);
+		threadInfo.callback->Execute(threadInfo.parameter);
+	}
+	/*
 	if (!mapDataThreadInfoQueue.IsEmpty()) {
-		FMapThreadInfo<FTri_HeightMap> threadInfo;
+		FMapThreadInfo<UTri_HeightMap*> threadInfo;
 		mapDataThreadInfoQueue.Dequeue(threadInfo);
 		threadInfo.callback->Execute(threadInfo.parameter);
 	}
@@ -45,13 +51,14 @@ void ATriMapThreading::Tick(float DeltaTime)
 		meshDataThreadInfoQueue.Dequeue(threadInfo);
 		threadInfo.callback->Execute(threadInfo.parameter);
 	}
+	*/
 }
 
 void ATriMapThreading::DrawMapInEditor()
 {
-	FTri_HeightMap mapData = HeightMapGenerator_Tri::GenerateHeightMap(meshSettings->numVertsPerLine, meshSettings->numVertsPerLine, heightMapSettings, FVector2D::ZeroVector);
+	UTri_HeightMap* mapData = HeightMapGenerator_Tri::GenerateHeightMap(meshSettings->numVertsPerLine, meshSettings->numVertsPerLine, heightMapSettings, FVector2D::ZeroVector);
 
-	UTriMeshData* meshData = TriMeshGenerator::GenerateTerrainMesh(mapData.values, meshSettings, 0);
+	UTriMeshData* meshData = TriMeshGenerator::GenerateTerrainMesh(mapData->values, meshSettings, 0);
 	meshData->CreateMesh(terrainMesh);
 	/*
 	//Add Texture to Material
@@ -61,24 +68,36 @@ void ATriMapThreading::DrawMapInEditor()
 	*/
 }
 
-void ATriMapThreading::RequestHeightData(FVector2D center, FMapReceived* callback)
+void ATriMapThreading::RequestData(TFunction<UObject* (void)> generateData, FDataRecieved* callback)
 {
-	AsyncTask(ENamedThreads::AnyHiPriThreadNormalTask, [center, callback, this]() {
-		FTri_HeightMap mapData = HeightMapGenerator_Tri::GenerateHeightMap(meshSettings->numVertsPerLine, meshSettings->numVertsPerLine, heightMapSettings, center);
-
-		AsyncTask(ENamedThreads::GameThread, [callback, mapData,this]() {
-			mapDataThreadInfoQueue.Enqueue(FMapThreadInfo<FTri_HeightMap>(callback, mapData));
+	AsyncTask(ENamedThreads::AnyHiPriThreadNormalTask, [generateData, callback, this]() {
+		UObject* data = generateData();
+		AsyncTask(ENamedThreads::GameThread, [callback, data, this]() {
+			//mapDataThreadInfoQueue.Enqueue(FMapThreadInfo<UTri_HeightMap*>(callback, mapData));
+			dataQueue.Enqueue(FThreadInfo(callback, data));
 		});
 	});
 }
 
-void ATriMapThreading::RequestMeshData(FTri_HeightMap heightMap, int lod, FMeshReceived* callback)
+/*
+void ATriMapThreading::RequestHeightData(FVector2D center, FMapReceived* callback)
+{
+	AsyncTask(ENamedThreads::AnyHiPriThreadNormalTask, [center, callback, this]() {
+		UTri_HeightMap* mapData = HeightMapGenerator_Tri::GenerateHeightMap(meshSettings->numVertsPerLine, meshSettings->numVertsPerLine, heightMapSettings, center);
+
+		AsyncTask(ENamedThreads::GameThread, [callback, mapData,this]() {
+			mapDataThreadInfoQueue.Enqueue(FMapThreadInfo<UTri_HeightMap*>(callback, mapData));
+		});
+	});
+}
+void ATriMapThreading::RequestMeshData(UTri_HeightMap* heightMap, int lod, FMeshReceived* callback)
 {
 	AsyncTask(ENamedThreads::AnyHiPriThreadNormalTask, [heightMap, lod, callback, this]() {
-		UTriMeshData* meshData = TriMeshGenerator::GenerateTerrainMesh(heightMap.values, meshSettings, lod);
+		UTriMeshData* meshData = TriMeshGenerator::GenerateTerrainMesh(heightMap->values, meshSettings, lod);
 
 		AsyncTask(ENamedThreads::GameThread, [callback, meshData, this]() {
 			meshDataThreadInfoQueue.Enqueue(FMapThreadInfo<UTriMeshData*>(callback, meshData));
 		});
 	});
 }
+*/

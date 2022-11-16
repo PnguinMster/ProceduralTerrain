@@ -8,8 +8,9 @@
 #include "ProceduralMeshComponent.h"
 #include "TriMapThreading.generated.h"
 
-DECLARE_DELEGATE_OneParam(FMapReceived, FTri_HeightMap);
-DECLARE_DELEGATE_OneParam(FMeshReceived, UTriMeshData*);
+//DECLARE_DELEGATE_OneParam(FMapReceived, UTri_HeightMap*);
+//DECLARE_DELEGATE_OneParam(FMeshReceived, UTriMeshData*);
+DECLARE_DELEGATE_OneParam(FDataRecieved, UObject*);
 
 UENUM(BlueprintType)
 enum class ETriDrawMode : uint8 {
@@ -17,20 +18,22 @@ enum class ETriDrawMode : uint8 {
 	ColorMap  UMETA(DisplayName = "Color Map"),
 };
 
-template<typename T>
-struct FMapThreadInfo
+USTRUCT()
+struct FThreadInfo
 {
-	TDelegate<void(T)>* callback;
-	T parameter;
-	FMapThreadInfo() {};
-	FMapThreadInfo(TDelegate<void(T)>* callback, T parameter) {
+	GENERATED_BODY()
+
+	FDataRecieved* callback;
+	UObject* parameter;
+	FThreadInfo() {};
+	FThreadInfo(FDataRecieved* callback, UObject* parameter) {
 		this->callback = callback;
 		this->parameter = parameter;
 	}
 };
 
-USTRUCT()
-struct FTri_HeightMap
+UCLASS()
+class PROCEDURALTERRAIN_API UTri_HeightMap : public UObject
 {
 	GENERATED_BODY()
 
@@ -39,11 +42,11 @@ public:
 	float minValue;
 	float maxValue;
 
-	FTri_HeightMap() {};
-	FTri_HeightMap(TArray<TArray<float>> values, float minValue, float maxValue) {
-		this->values = values;
-		this->minValue = minValue;
-		this->maxValue = maxValue;
+	UTri_HeightMap() {};
+	void Initialize(TArray<TArray<float>> Values, float MinValue, float MaxValue) {
+		values = Values;
+		minValue = MinValue;
+		maxValue = MaxValue;
 	}
 };
 
@@ -77,9 +80,9 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 		ETriDrawMode drawMode = ETriDrawMode::ColorMap;
 
-	TQueue<FMapThreadInfo<FTri_HeightMap>> mapDataThreadInfoQueue;
-	TQueue<FMapThreadInfo<UTriMeshData*>> meshDataThreadInfoQueue;
-
+	//TQueue<FMapThreadInfo<UTri_HeightMap*>> mapDataThreadInfoQueue;
+	//TQueue<FMapThreadInfo<UTriMeshData*>> meshDataThreadInfoQueue;
+	TQueue<FThreadInfo> dataQueue;
 	// Sets default values for this actor's properties
 	ATriMapThreading();
 
@@ -96,6 +99,5 @@ public:
 
 	void DrawMapInEditor();
 
-	void RequestHeightData(FVector2D center, FMapReceived* callback);
-	void RequestMeshData(FTri_HeightMap heightMap, int lod, FMeshReceived* callback);
+	void RequestData(TFunction<UObject* (void)> generateData, FDataRecieved* callback);
 };
