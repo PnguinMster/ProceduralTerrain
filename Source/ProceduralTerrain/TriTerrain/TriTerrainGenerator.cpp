@@ -3,8 +3,7 @@
 
 ATriTerrainGenerator::ATriTerrainGenerator()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = true;
 }
 
 // Called when the game starts or when spawned
@@ -12,8 +11,8 @@ void ATriTerrainGenerator::BeginPlay()
 {
 	Super::BeginPlay();
 
-	meshWorldSize = mapThread->meshSettings->GetMeshWorldSize();
-	chunksVisibleInViewDist = detailLevels[detailLevels.Num() - 1].visibleChunks;
+	meshWorldSize = meshSettings->GetMeshWorldSize();
+	chunksVisibleInViewDist = meshSettings->detailLevels[meshSettings->detailLevels.Num() - 1].visibleChunks;
 	maxViewDist = chunksVisibleInViewDist * meshWorldSize;
 	ViewerPawn = GetWorld()->GetFirstPlayerController()->GetPawn();
 	UpdateVisibleChunk();
@@ -55,7 +54,7 @@ void ATriTerrainGenerator::UpdateVisibleChunk()
 					const FTransform SpawnLocAndRotation;
 					//Delay Actor Spawning to call appropriate functions first
 					AChunk_Tri* chunk = GetWorld()->SpawnActorDeferred<AChunk_Tri>(AChunk_Tri::StaticClass(), SpawnLocAndRotation);
-					chunk->Initialize(viewedChunkCoord, meshWorldSize, mapThread, detailLevels, maxViewDist, materialInterface, viewerPosition, &visibleTerrainChunks);
+					chunk->Initialize(viewedChunkCoord, meshWorldSize, meshSettings, heightMapSettings, mapThread, maxViewDist, viewerPosition, &visibleTerrainChunks);
 					terrainChunkMap.Add(viewedChunkCoord, chunk);
 					//Spawn Actor
 					chunk->FinishSpawning(SpawnLocAndRotation);

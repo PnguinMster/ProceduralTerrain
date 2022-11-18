@@ -1,4 +1,5 @@
 #include "Chunk_Tri.h"
+#include "TriMeshGenerator.h"
 #include "HeightMapGenerator_Tri.h"
 
 AChunk_Tri::AChunk_Tri()
@@ -8,36 +9,34 @@ AChunk_Tri::AChunk_Tri()
 	UpdateChunkDelegate.BindUObject(this, &AChunk_Tri::UpdateTerrainChunk);
 }
 
-void AChunk_Tri::Initialize(FVector2D Coord, float MeshWorldSize, ATriMapThreading* actor, TArray<FTriLODInfo>& DetailLevels, float MaxViewDist, UMaterialInterface* MaterialInterface, FVector2D& ViewerPosition, TArray<AChunk_Tri*>* VisibleTerrainChunks)
+void AChunk_Tri::Initialize(FVector2D Coord, float MeshWorldSize, UTriMeshSettings* MeshSettings, UTriHeightMapSettings* HeightMapSettings, ATriMapThreading* MapThread, float MaxViewDist, FVector2D& ViewerPosition, TArray<AChunk_Tri*>* VisibleTerrainChunks)
 {
-	//DO NOT put in constructor
-	//It Will Break
 	DataRecievedDelegate.BindUObject(this, &AChunk_Tri::OnHeightMapRecieved);
 
-	mapThread = actor;
-	sampleCenter = Coord * MeshWorldSize / mapThread->meshSettings->meshScale;
+	meshSettings = MeshSettings;
+	heightMapSettings = HeightMapSettings;
+	mapThread = MapThread;
+	sampleCenter = Coord * MeshWorldSize / meshSettings->meshScale;
 	coord = Coord;
 	FVector positionV3 = FVector(Coord.X, Coord.Y, 0) * MeshWorldSize;
 	position = Coord * MeshWorldSize;
 	meshWorldSize = MeshWorldSize;
 	maxViewDist = MaxViewDist;
-	materialInterface = MaterialInterface;
 	viewerPosition = &ViewerPosition;
 	visibleTerrainChunks = VisibleTerrainChunks;
-	detailLevels = &DetailLevels;
 
 	SetVisible(false);
 
-	lodMeshes.SetNum((*detailLevels).Num());
-	for (int i = 0; i < (*detailLevels).Num(); i++) {
+	lodMeshes.SetNum(MeshSettings->detailLevels.Num());
+	for (int i = 0; i < MeshSettings->detailLevels.Num(); i++) {
 		lodMeshes[i] = NewObject<UTriLODMesh>();
-		lodMeshes[i]->Initialize((*detailLevels)[i].lod, &UpdateChunkDelegate, mapThread);
+		lodMeshes[i]->Initialize(MeshSettings->detailLevels[i].lod, &UpdateChunkDelegate, mapThread);
 	}
 
 	SetTexture();
 
 	meshObject->SetWorldLocation(positionV3);
-	TFunction<UObject* (void)> function = [=]() {return HeightMapGenerator_Tri::GenerateHeightMap(mapThread->meshSettings->numVertsPerLine, mapThread->meshSettings->numVertsPerLine, mapThread->heightMapSettings, sampleCenter); };
+	TFunction<UObject* (void)> function = [=]() {return HeightMapGenerator_Tri::GenerateHeightMap(meshSettings->numVertsPerLine, meshSettings->numVertsPerLine, heightMapSettings, sampleCenter); };
 	mapThread->RequestData(function, &DataRecievedDelegate);
 }
 
@@ -82,7 +81,7 @@ UTexture2D* AChunk_Tri::FloatArrayToTexture(TArray<float> convertArray)
 void AChunk_Tri::SetTexture()
 {
 	//Add Texture to Material
-	int regionsCount = mapThread->regions.Num();
+	int regionsCount = heightMapSettings->regions.Num();
 	TArray<FColor> colors;
 	TArray<float> heights;
 	TArray<float> blends;
@@ -90,18 +89,18 @@ void AChunk_Tri::SetTexture()
 	heights.SetNum(regionsCount);
 	blends.SetNum(regionsCount);
 	for (int i = 0; i < regionsCount; i++) {
-		colors[i] = mapThread->regions[i].color;
-		heights[i] = mapThread->regions[i].height;
-		blends[i] = mapThread->regions[i].blend;
+		colors[i] = heightMapSettings->regions[i].color;
+		heights[i] = heightMapSettings->regions[i].height;
+		blends[i] = heightMapSettings->regions[i].blend;
 	}
 
 	UTexture2D* colorTexture = ColorArrayToTexture(colors);
 	UTexture2D* heightTexture = FloatArrayToTexture(heights);
 	UTexture2D* blendTexture = FloatArrayToTexture(blends);
 
-	UMaterialInstanceDynamic* dynamicMaterialInstance = UMaterialInstanceDynamic::Create(materialInterface, meshObject->GetOwner());
-	dynamicMaterialInstance->SetScalarParameterValue("MinHeight", mapThread->heightMapSettings->GetMinHeight());
-	dynamicMaterialInstance->SetScalarParameterValue("MaxHeight", mapThread->heightMapSettings->GetMaxHeight());
+	UMaterialInstanceDynamic* dynamicMaterialInstance = UMaterialInstanceDynamic::Create(meshSettings->materialInterface, meshObject->GetOwner());
+	dynamicMaterialInstance->SetScalarParameterValue("MinHeight", heightMapSettings->GetMinHeight());
+	dynamicMaterialInstance->SetScalarParameterValue("MaxHeight", heightMapSettings->GetMaxHeight());
 	dynamicMaterialInstance->SetScalarParameterValue("RegionCount", regionsCount);
 	dynamicMaterialInstance->SetTextureParameterValue("ColorTexture", colorTexture);
 	dynamicMaterialInstance->SetTextureParameterValue("HeightTexture", heightTexture);
@@ -128,8 +127,8 @@ void AChunk_Tri::UpdateTerrainChunk()
 
 		if (visible) {
 			int lodIndex = 0;
-			for (int i = 0; i < (*detailLevels).Num() - 1; i++) {
-				if (viewerDistFromNearestChunk > (*detailLevels)[i].visibleChunks * meshWorldSize)
+			for (int i = 0; i < meshSettings->detailLevels.Num() - 1; i++) {
+				if (viewerDistFromNearestChunk > meshSettings->detailLevels[i].visibleChunks * meshWorldSize)
 					lodIndex = i + 1;
 				else 
 					break;
@@ -142,7 +141,7 @@ void AChunk_Tri::UpdateTerrainChunk()
 					meshObject->SetProcMeshSection(0, *lodMesh->mesh->GetProcMeshSection(0));
 				}
 				else if (!lodMesh->hasRequestedmesh) {
-					lodMesh->RequestMesh(mapData, mapThread->meshSettings);
+					lodMesh->RequestMesh(mapData, meshSettings);
 				}
 			}
 		}

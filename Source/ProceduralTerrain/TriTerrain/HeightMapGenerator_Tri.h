@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "TriMapThreading.h"
+#include "TriHeightMapSettings.h"
 #include "TriHeightMapSettings.h"
 
 class PROCEDURALTERRAIN_API HeightMapGenerator_Tri

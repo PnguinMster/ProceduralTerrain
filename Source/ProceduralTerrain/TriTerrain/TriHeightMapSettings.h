@@ -4,6 +4,36 @@
 #include "Engine/DataAsset.h"
 #include "TriHeightMapSettings.generated.h"
 
+UCLASS()
+class PROCEDURALTERRAIN_API UTri_HeightMap : public UObject
+{
+	GENERATED_BODY()
+
+public:
+	TArray<TArray<float>> values;
+	float minValue;
+	float maxValue;
+
+	UTri_HeightMap() {};
+	void Initialize(TArray<TArray<float>> Values, float MinValue, float MaxValue) {
+		values = Values;
+		minValue = MinValue;
+		maxValue = MaxValue;
+	}
+};
+
+USTRUCT()
+struct FTriTerrainType {
+	GENERATED_BODY()
+
+		UPROPERTY(EditAnywhere, meta = (ClampMin = "0.0", ClampMax = "1.0", UIMin = "0.0", UIMax = "1.0"))
+		float height;
+	UPROPERTY(EditAnywhere, meta = (ClampMin = "0.0", ClampMax = "1.0", UIMin = "0.0", UIMax = "1.0"))
+		float blend;
+	UPROPERTY(EditAnywhere)
+		FColor color;
+};
+
 USTRUCT()
 struct FTri_NoiseSettings
 {
@@ -38,6 +68,8 @@ public:
 		float heightMultiplier = 5.f;
 	UPROPERTY(EditDefaultsOnly)
 		UCurveFloat* heightCurve;
+	UPROPERTY(EditDefaultsOnly)
+		TArray<FTriTerrainType> regions;
 
 	float GetMinHeight();
 	float GetMaxHeight();
