@@ -37,7 +37,7 @@ public:
 	TArray<UTriLODMesh*> lodMeshes;
 	TArray<AChunk_Tri*>* visibleTerrainChunks;
 
-	void Initialize(FVector2D Coord, UTriMeshSettings* MeshSettings, UTriHeightMapSettings* HeightMapSettings, UTriMapThreading* MapThread, FVector2D& ViewerPosition, TArray<AChunk_Tri*>* VisibleTerrainChunks);
+	void Initialize(UTriMapThreading* MapThread, UTriMeshSettings* MeshSettings, UTriHeightMapSettings* HeightMapSettings, TArray<AChunk_Tri*>* VisibleTerrainChunks, FVector2D Coord, FVector2D& ViewerPosition);
 	void UpdateTerrainChunk();
 
 	void OnHeightMapRecieved(UObject* heightMapObject);

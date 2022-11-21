@@ -9,7 +9,7 @@ AChunk_Tri::AChunk_Tri()
 	UpdateChunkDelegate.BindUObject(this, &AChunk_Tri::UpdateTerrainChunk);
 }
 
-void AChunk_Tri::Initialize(FVector2D Coord, UTriMeshSettings* MeshSettings, UTriHeightMapSettings* HeightMapSettings, UTriMapThreading* MapThread, FVector2D& ViewerPosition, TArray<AChunk_Tri*>* VisibleTerrainChunks)
+void AChunk_Tri::Initialize(UTriMapThreading* MapThread, UTriMeshSettings* MeshSettings, UTriHeightMapSettings* HeightMapSettings, TArray<AChunk_Tri*>* VisibleTerrainChunks, FVector2D Coord, FVector2D& ViewerPosition)
 {
 	DataRecievedDelegate.BindUObject(this, &AChunk_Tri::OnHeightMapRecieved);
 

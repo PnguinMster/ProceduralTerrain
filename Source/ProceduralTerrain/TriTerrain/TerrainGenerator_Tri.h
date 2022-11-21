@@ -6,15 +6,15 @@
 #include "TriMeshGenerator.h"
 #include "TriMeshSettings.h"
 #include "TriHeightMapSettings.h"
-#include "TriTerrainGenerator.generated.h"
+#include "TerrainGenerator_Tri.generated.h"
 
 UCLASS()
-class PROCEDURALTERRAIN_API ATriTerrainGenerator : public AActor
+class PROCEDURALTERRAIN_API ATerrainGenerator_Tri : public AActor
 {
 	GENERATED_BODY()
 	
 public:	
-	ATriTerrainGenerator();
+	ATerrainGenerator_Tri();
 
 	UPROPERTY(EditDefaultsOnly)
 		UTriMeshSettings* meshSettings;
@@ -23,19 +23,21 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
-	const float viewerMoveThresholdForChunkUpdate = 15.f;
-	const float sqrViewerMoveThresholdForChunkUpdate = viewerMoveThresholdForChunkUpdate * viewerMoveThresholdForChunkUpdate;
-	int chunksVisibleInViewDist;
+	void UpdateVisibleChunk();
+	void CreateChunk(FVector2D& viewedChunkCoord);
 
-	TMap<FVector2D, AChunk_Tri*> terrainChunkMap;
-	TArray<AChunk_Tri*> visibleTerrainChunks;
+	const float moveThresholdForChunkUpdate = 300.f;
+	int chunksVisibleInView;
+
+	TMap<FVector2D, AChunk_Tri*> chunkMap;
+	TArray<AChunk_Tri*> visibleChunks;
 
 	UTriMapThreading* mapThread;
 	APawn* ViewerPawn;
+
 	FVector2D viewerPosition;
 	FVector2D viewerPositionOld;
 public:	
 	virtual void Tick(float DeltaTime) override;
 
-	void UpdateVisibleChunk();
 };
