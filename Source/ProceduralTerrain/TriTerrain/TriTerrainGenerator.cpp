@@ -4,6 +4,8 @@
 ATriTerrainGenerator::ATriTerrainGenerator()
 {
 	PrimaryActorTick.bCanEverTick = true;
+
+	mapThread = CreateDefaultSubobject<UTriMapThreading>(TEXT("MapThreader"));
 }
 
 // Called when the game starts or when spawned
@@ -11,9 +13,7 @@ void ATriTerrainGenerator::BeginPlay()
 {
 	Super::BeginPlay();
 
-	meshWorldSize = meshSettings->GetMeshWorldSize();
 	chunksVisibleInViewDist = meshSettings->detailLevels[meshSettings->detailLevels.Num() - 1].visibleChunks;
-	maxViewDist = chunksVisibleInViewDist * meshWorldSize;
 	ViewerPawn = GetWorld()->GetFirstPlayerController()->GetPawn();
 	UpdateVisibleChunk();
 }
@@ -39,8 +39,8 @@ void ATriTerrainGenerator::UpdateVisibleChunk()
 		visibleTerrainChunks[i]->UpdateTerrainChunk();
 	}
 
-	int currentChunkCoordX = FMath::RoundToInt(viewerPosition.X / meshWorldSize);
-	int currentChunkCoordY = FMath::RoundToInt(viewerPosition.Y / meshWorldSize);
+	int currentChunkCoordX = FMath::RoundToInt(viewerPosition.X / meshSettings->GetMeshWorldSize());
+	int currentChunkCoordY = FMath::RoundToInt(viewerPosition.Y / meshSettings->GetMeshWorldSize());
 
 	for (int yOffset = -chunksVisibleInViewDist; yOffset <= chunksVisibleInViewDist; yOffset++) {
 		for (int xOffset = -chunksVisibleInViewDist; xOffset <= chunksVisibleInViewDist; xOffset++) {
@@ -54,7 +54,7 @@ void ATriTerrainGenerator::UpdateVisibleChunk()
 					const FTransform SpawnLocAndRotation;
 					//Delay Actor Spawning to call appropriate functions first
 					AChunk_Tri* chunk = GetWorld()->SpawnActorDeferred<AChunk_Tri>(AChunk_Tri::StaticClass(), SpawnLocAndRotation);
-					chunk->Initialize(viewedChunkCoord, meshWorldSize, meshSettings, heightMapSettings, mapThread, maxViewDist, viewerPosition, &visibleTerrainChunks);
+					chunk->Initialize(viewedChunkCoord, meshSettings, heightMapSettings, mapThread, viewerPosition, &visibleTerrainChunks);
 					terrainChunkMap.Add(viewedChunkCoord, chunk);
 					//Spawn Actor
 					chunk->FinishSpawning(SpawnLocAndRotation);

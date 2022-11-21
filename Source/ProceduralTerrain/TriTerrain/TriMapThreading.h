@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Components/ActorComponent.h"
 #include "TriMapThreading.generated.h"
 
 DECLARE_DELEGATE_OneParam(FDataRecieved, UObject*);
@@ -17,18 +18,18 @@ struct FThreadInfo
 	FThreadInfo(FDataRecieved* callback, UObject* parameter);
 };
 
-UCLASS()
-class PROCEDURALTERRAIN_API ATriMapThreading : public AActor
+UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
+class PROCEDURALTERRAIN_API UTriMapThreading : public UActorComponent
 {
 	GENERATED_BODY()
 	
 public:	
-	ATriMapThreading();
+	UTriMapThreading();
 
 protected:
 	TQueue<FThreadInfo> dataQueue;
 
 public:	
-	virtual void Tick(float DeltaTime) override;
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	void RequestData(TFunction<UObject* (void)> generateData, FDataRecieved* callback);
 };

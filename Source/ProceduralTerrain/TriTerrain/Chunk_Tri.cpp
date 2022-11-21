@@ -9,28 +9,27 @@ AChunk_Tri::AChunk_Tri()
 	UpdateChunkDelegate.BindUObject(this, &AChunk_Tri::UpdateTerrainChunk);
 }
 
-void AChunk_Tri::Initialize(FVector2D Coord, float MeshWorldSize, UTriMeshSettings* MeshSettings, UTriHeightMapSettings* HeightMapSettings, ATriMapThreading* MapThread, float MaxViewDist, FVector2D& ViewerPosition, TArray<AChunk_Tri*>* VisibleTerrainChunks)
+void AChunk_Tri::Initialize(FVector2D Coord, UTriMeshSettings* MeshSettings, UTriHeightMapSettings* HeightMapSettings, UTriMapThreading* MapThread, FVector2D& ViewerPosition, TArray<AChunk_Tri*>* VisibleTerrainChunks)
 {
 	DataRecievedDelegate.BindUObject(this, &AChunk_Tri::OnHeightMapRecieved);
 
+	coord = Coord;
 	meshSettings = MeshSettings;
 	heightMapSettings = HeightMapSettings;
 	mapThread = MapThread;
-	sampleCenter = Coord * MeshWorldSize / meshSettings->meshScale;
-	coord = Coord;
-	FVector positionV3 = FVector(Coord.X, Coord.Y, 0) * MeshWorldSize;
-	position = Coord * MeshWorldSize;
-	meshWorldSize = MeshWorldSize;
-	maxViewDist = MaxViewDist;
 	viewerPosition = &ViewerPosition;
 	visibleTerrainChunks = VisibleTerrainChunks;
+
+	sampleCenter = Coord * meshSettings->GetMeshWorldSize() / meshSettings->meshScale;
+	position = Coord * meshSettings->GetMeshWorldSize();
+	FVector positionV3 = FVector(Coord.X, Coord.Y, 0) * meshSettings->GetMeshWorldSize();
 
 	SetVisible(false);
 
 	lodMeshes.SetNum(MeshSettings->detailLevels.Num());
 	for (int i = 0; i < MeshSettings->detailLevels.Num(); i++) {
 		lodMeshes[i] = NewObject<UTriLODMesh>();
-		lodMeshes[i]->Initialize(MeshSettings->detailLevels[i].lod, &UpdateChunkDelegate, mapThread);
+		lodMeshes[i]->Initialize(MeshSettings->detailLevels[i].lod, &UpdateChunkDelegate);
 	}
 
 	SetTexture();
@@ -80,14 +79,16 @@ UTexture2D* AChunk_Tri::FloatArrayToTexture(TArray<float> convertArray)
 
 void AChunk_Tri::SetTexture()
 {
-	//Add Texture to Material
 	int regionsCount = heightMapSettings->regions.Num();
+
 	TArray<FColor> colors;
 	TArray<float> heights;
 	TArray<float> blends;
+
 	colors.SetNum(regionsCount);
 	heights.SetNum(regionsCount);
 	blends.SetNum(regionsCount);
+
 	for (int i = 0; i < regionsCount; i++) {
 		colors[i] = heightMapSettings->regions[i].color;
 		heights[i] = heightMapSettings->regions[i].height;
@@ -123,12 +124,12 @@ void AChunk_Tri::UpdateTerrainChunk()
 	{
 		float viewerDistFromNearestChunk = FVector2D::Distance(position, *viewerPosition);
 		bool wasVisible = IsVisible();
-		bool visible = viewerDistFromNearestChunk <= maxViewDist;
+		bool visible = viewerDistFromNearestChunk <= meshSettings->detailLevels[meshSettings->detailLevels.Num() - 1].visibleChunks * meshSettings->GetMeshWorldSize();
 
 		if (visible) {
 			int lodIndex = 0;
 			for (int i = 0; i < meshSettings->detailLevels.Num() - 1; i++) {
-				if (viewerDistFromNearestChunk > meshSettings->detailLevels[i].visibleChunks * meshWorldSize)
+				if (viewerDistFromNearestChunk > meshSettings->detailLevels[i].visibleChunks * meshSettings->GetMeshWorldSize())
 					lodIndex = i + 1;
 				else 
 					break;
@@ -141,7 +142,7 @@ void AChunk_Tri::UpdateTerrainChunk()
 					meshObject->SetProcMeshSection(0, *lodMesh->mesh->GetProcMeshSection(0));
 				}
 				else if (!lodMesh->hasRequestedmesh) {
-					lodMesh->RequestMesh(mapData, meshSettings);
+					lodMesh->RequestMesh(mapData, meshSettings, mapThread);
 				}
 			}
 		}
@@ -163,10 +164,9 @@ UTriLODMesh::UTriLODMesh()
 	meshDataRecieved.BindUObject(this, &UTriLODMesh::OnMeshDataRecieved);
 }
 
-void UTriLODMesh::Initialize(int Lod, FVoidDelegate* UpdateCallback, ATriMapThreading* MapThread)
+void UTriLODMesh::Initialize(int Lod, FVoidDelegate* UpdateCallback)
 {
 	lod = Lod;
-	mapThread = MapThread;
 	updateCallback = UpdateCallback;
 }
 
@@ -178,7 +178,7 @@ void UTriLODMesh::OnMeshDataRecieved(UObject* meshDataObject)
 	updateCallback->Execute();
 }
 
-void UTriLODMesh::RequestMesh(UTri_HeightMap* heightMap, UTriMeshSettings* meshSettings)
+void UTriLODMesh::RequestMesh(UTri_HeightMap* heightMap, UTriMeshSettings* meshSettings, UTriMapThreading* mapThread)
 {
 	TFunction<UObject* (void)> function = [=]() { return TriMeshGenerator::GenerateTerrainMesh(heightMap->values, meshSettings, lod); };
 	hasRequestedmesh = true;

@@ -20,20 +20,17 @@ public:
 		UTriMeshSettings* meshSettings;
 	UPROPERTY(EditDefaultsOnly)
 		UTriHeightMapSettings* heightMapSettings;
-	UPROPERTY(EditAnywhere)
-		ATriMapThreading* mapThread;
 protected:
 	virtual void BeginPlay() override;
 
 	const float viewerMoveThresholdForChunkUpdate = 15.f;
 	const float sqrViewerMoveThresholdForChunkUpdate = viewerMoveThresholdForChunkUpdate * viewerMoveThresholdForChunkUpdate;
-	float maxViewDist;
-	float meshWorldSize;
 	int chunksVisibleInViewDist;
 
 	TMap<FVector2D, AChunk_Tri*> terrainChunkMap;
 	TArray<AChunk_Tri*> visibleTerrainChunks;
 
+	UTriMapThreading* mapThread;
 	APawn* ViewerPawn;
 	FVector2D viewerPosition;
 	FVector2D viewerPositionOld;

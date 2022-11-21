@@ -8,14 +8,14 @@ FThreadInfo::FThreadInfo(FDataRecieved* callback, UObject* parameter)
 }
 
 
-ATriMapThreading::ATriMapThreading()
+UTriMapThreading::UTriMapThreading()
 {
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryComponentTick.bCanEverTick = true;
 }
 
-void ATriMapThreading::Tick(float DeltaTime)
+void UTriMapThreading::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
-	Super::Tick(DeltaTime);
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	if (!dataQueue.IsEmpty()) {
 		FThreadInfo threadInfo;
@@ -24,7 +24,7 @@ void ATriMapThreading::Tick(float DeltaTime)
 	}
 }
 
-void ATriMapThreading::RequestData(TFunction<UObject* (void)> generateData, FDataRecieved* callback)
+void UTriMapThreading::RequestData(TFunction<UObject* (void)> generateData, FDataRecieved* callback)
 {
 	AsyncTask(ENamedThreads::AnyHiPriThreadNormalTask, [generateData, callback, this]() {
 		UObject* data = generateData();

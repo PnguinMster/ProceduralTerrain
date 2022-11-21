@@ -21,7 +21,7 @@ public:
 	UTriHeightMapSettings* heightMapSettings;
 	UTriMeshSettings* meshSettings;
 	UTri_HeightMap* mapData;
-	ATriMapThreading* mapThread;
+	UTriMapThreading* mapThread;
 
 	FDataRecieved DataRecievedDelegate;
 	FVoidDelegate UpdateChunkDelegate;
@@ -33,13 +33,11 @@ public:
 
 	bool heightMapRecieved;
 	int previousLODIndex = -1;
-	float maxViewDist;
-	float meshWorldSize;
 
 	TArray<UTriLODMesh*> lodMeshes;
 	TArray<AChunk_Tri*>* visibleTerrainChunks;
 
-	void Initialize(FVector2D Coord, float MeshWorldSize, UTriMeshSettings* MeshSettings, UTriHeightMapSettings* HeightMapSettings, ATriMapThreading* MapThread, float MaxViewDist, FVector2D& ViewerPosition, TArray<AChunk_Tri*>* VisibleTerrainChunks);
+	void Initialize(FVector2D Coord, UTriMeshSettings* MeshSettings, UTriHeightMapSettings* HeightMapSettings, UTriMapThreading* MapThread, FVector2D& ViewerPosition, TArray<AChunk_Tri*>* VisibleTerrainChunks);
 	void UpdateTerrainChunk();
 
 	void OnHeightMapRecieved(UObject* heightMapObject);
@@ -61,14 +59,13 @@ public:
 	FVoidDelegate* updateCallback;
 
 	UProceduralMeshComponent* mesh;
-	ATriMapThreading* mapThread;
 	
 	bool hasRequestedmesh;
 	bool hasMesh;
 	int lod;
 
 	UTriLODMesh();
-	void Initialize(int Lod, FVoidDelegate* UpdateCallback, ATriMapThreading* MapThread);
+	void Initialize(int Lod, FVoidDelegate* UpdateCallback);
 	void OnMeshDataRecieved(UObject* meshDataObject);
-	void RequestMesh(UTri_HeightMap* heightMap, UTriMeshSettings* meshSettings);
+	void RequestMesh(UTri_HeightMap* heightMap, UTriMeshSettings* meshSettings, UTriMapThreading* mapThread);
 };
