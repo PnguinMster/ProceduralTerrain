@@ -1,11 +1,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "TriHeightMapSettings.h"
-#include "TriHeightMapSettings.h"
+#include "HeightMapSettings_Tri.h"
 
 class PROCEDURALTERRAIN_API HeightMapGenerator_Tri
 {
 public:
-	static UTri_HeightMap* GenerateHeightMap(int width, int height, UTriHeightMapSettings* heightSettings, FVector2D sampleCenter);
+	static UHeightMap_Tri* GenerateHeightMap(int width, int height, UHeightMapSettings_Tri* heightSettings, FVector2D sampleCenter);
 };

@@ -18,18 +18,17 @@ public:
 
 	bool heightMapRecieved;
 
-	void Initialize(UMapThreading_Tri* MapThread, UTriMeshSettings* MeshSettings, UTriHeightMapSettings* HeightMapSettings, TArray<AChunk_Tri*>* VisibleTerrainChunks, FVector2D Coord, FVector2D& ViewerPosition);
+	void Initialize(UMapThreading_Tri* MapThread, UTriMeshSettings* MeshSettings, UHeightMapSettings_Tri* HeightMapSettings, TArray<AChunk_Tri*>* VisibleTerrainChunks, FVector2D Coord, FVector2D& ViewerPosition);
 	void UpdateChunk();
 	void OnHeightMapRecieved(UObject* heightMapObject);
 
 protected:
 	UMapThreading_Tri* mapThread;
 	UProceduralMeshComponent* meshObject;
-	UTri_HeightMap* mapData;
-	UTriHeightMapSettings* heightMapSettings;
+	UHeightMap_Tri* mapData;
+	UHeightMapSettings_Tri* heightMapSettings;
 	UTriMeshSettings* meshSettings;
 
-	FVector2D position;
 	FVector2D sampleCenter;
 	FVector2D* viewerPosition;
 
@@ -37,15 +36,10 @@ protected:
 	TArray<ULODMesh_Tri*> lodMeshes;
 
 	int previousLODIndex = -1;
-
 	
 	bool IsVisible() { return meshObject->IsVisible(); }
 
-	static UTexture2D* ColorArrayToTexture(TArray<FColor> colors);
-	static UTexture2D* FloatArrayToTexture(TArray<float> convertArray);
-
 	void MakeMeshVisible(float viewerDistFromNearestChunk, bool shouldBeVisisble);
 	void SetLODMeshes(TArray<FTriLODInfo>& detailLevels);
-	void SetTexture();
 	void SetVisible(bool visible) { meshObject->SetVisibility(visible); }
 };

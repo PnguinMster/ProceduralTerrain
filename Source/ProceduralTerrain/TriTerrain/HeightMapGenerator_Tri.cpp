@@ -1,9 +1,9 @@
 #include "HeightMapGenerator_Tri.h"
-#include "TriNoiseMap.h"
+#include "HeightMapSettings_Tri.h"
 
-UTri_HeightMap* HeightMapGenerator_Tri::GenerateHeightMap(int width, int height, UTriHeightMapSettings* settings, FVector2D sampleCenter)
+UHeightMap_Tri* HeightMapGenerator_Tri::GenerateHeightMap(int width, int height, UHeightMapSettings_Tri* settings, FVector2D sampleCenter)
 {
-	TArray<TArray<float>> values = TriNoiseMap::GenerateNoiseMap(width, height, settings->noiseSettings, sampleCenter);
+	TArray<TArray<float>> values = NoiseMap_Tri::GenerateNoiseMap(width, height, settings->noiseSettings, sampleCenter);
 	
 	float maxValue = TNumericLimits<float>::Min();
 	float minValue = TNumericLimits<float>::Max();
@@ -20,7 +20,7 @@ UTri_HeightMap* HeightMapGenerator_Tri::GenerateHeightMap(int width, int height,
 			}
 		}
 	}
-	UTri_HeightMap* heightMap = NewObject<UTri_HeightMap>();
+	UHeightMap_Tri* heightMap = NewObject<UHeightMap_Tri>();
 	heightMap->Initialize(values, minValue, maxValue);
 
 	return heightMap;

@@ -3,7 +3,7 @@
 #include "CoreMinimal.h"
 #include "Chunk_Tri.h"
 #include "MapThreading_Tri.h"
-#include "TriHeightMapSettings.h"
+#include "HeightMapSettings_Tri.h"
 #include "TriMeshGenerator.h"
 #include "TriMeshSettings.h"
 #include "TerrainGenerator_Tri.generated.h"
@@ -19,7 +19,7 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 		UTriMeshSettings* meshSettings;
 	UPROPERTY(EditDefaultsOnly)
-		UTriHeightMapSettings* heightMapSettings;
+		UHeightMapSettings_Tri* heightMapSettings;
 
 protected:
 	virtual void BeginPlay() override;

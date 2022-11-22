@@ -1,7 +1,7 @@
-#include "TriNoiseMap.h"
+#include "NoiseMap_Tri.h"
 #include "Kismet/KismetMathLibrary.h"
 
-void TriNoiseMap::Set2DArrayNum(TArray<TArray<float>>& array, int width, int height)
+void NoiseMap_Tri::Set2DArrayNum(TArray<TArray<float>>& array, int width, int height)
 {
 	array.SetNum(width);
 
@@ -9,7 +9,7 @@ void TriNoiseMap::Set2DArrayNum(TArray<TArray<float>>& array, int width, int hei
 		array[i].SetNum(height);
 }
 
-TArray<TArray<float>> TriNoiseMap::GenerateNoiseMap(int mapWidth, int mapHeight, FTri_NoiseSettings settings, FVector2D sampleCenter)
+TArray<TArray<float>> NoiseMap_Tri::GenerateNoiseMap(int mapWidth, int mapHeight, FNoiseSettings_Tri settings, FVector2D sampleCenter)
 {
 	TArray<TArray<float>> noiseMap;
 	Set2DArrayNum(noiseMap, mapWidth, mapHeight);
