@@ -1,4 +1,4 @@
-#include "TriMapThreading.h"
+#include "MapThreading_Tri.h"
 #include "Async/Async.h"
 
 FThreadInfo::FThreadInfo(FDataRecieved* callback, UObject* parameter)
@@ -7,13 +7,12 @@ FThreadInfo::FThreadInfo(FDataRecieved* callback, UObject* parameter)
 	this->parameter = parameter;
 }
 
-
-UTriMapThreading::UTriMapThreading()
+UMapThreading_Tri::UMapThreading_Tri()
 {
 	PrimaryComponentTick.bCanEverTick = true;
 }
 
-void UTriMapThreading::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void UMapThreading_Tri::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
@@ -24,7 +23,7 @@ void UTriMapThreading::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 	}
 }
 
-void UTriMapThreading::RequestData(TFunction<UObject* (void)> generateData, FDataRecieved* callback)
+void UMapThreading_Tri::RequestData(TFunction<UObject* (void)> generateData, FDataRecieved* callback)
 {
 	AsyncTask(ENamedThreads::AnyHiPriThreadNormalTask, [generateData, callback, this]() {
 		UObject* data = generateData();

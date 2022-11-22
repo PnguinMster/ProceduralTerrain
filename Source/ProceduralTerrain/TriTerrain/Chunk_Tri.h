@@ -1,71 +1,51 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "TriMeshSettings.h"
-#include "TriMapThreading.h"
-#include "TriHeightMapSettings.h"
-#include "ProceduralMeshComponent.h"
+#include "LODMesh_Tri.h"
 #include "Chunk_Tri.generated.h"
-
-DECLARE_DELEGATE(FVoidDelegate);
 
 UCLASS()
 class PROCEDURALTERRAIN_API AChunk_Tri : public AActor
 {
 	GENERATED_BODY()
-	
-public:	
-	AChunk_Tri();
 
-	UProceduralMeshComponent* meshObject;
-	UTriHeightMapSettings* heightMapSettings;
-	UTriMeshSettings* meshSettings;
-	UTri_HeightMap* mapData;
-	UTriMapThreading* mapThread;
+public:
+	AChunk_Tri();
 
 	FDataRecieved DataRecievedDelegate;
 	FVoidDelegate UpdateChunkDelegate;
-
 	FVector2D coord;
-	FVector2D sampleCenter;
-	FVector2D position;
-	FVector2D* viewerPosition;
 
 	bool heightMapRecieved;
+
+	void Initialize(UMapThreading_Tri* MapThread, UTriMeshSettings* MeshSettings, UTriHeightMapSettings* HeightMapSettings, TArray<AChunk_Tri*>* VisibleTerrainChunks, FVector2D Coord, FVector2D& ViewerPosition);
+	void UpdateChunk();
+	void OnHeightMapRecieved(UObject* heightMapObject);
+
+protected:
+	UMapThreading_Tri* mapThread;
+	UProceduralMeshComponent* meshObject;
+	UTri_HeightMap* mapData;
+	UTriHeightMapSettings* heightMapSettings;
+	UTriMeshSettings* meshSettings;
+
+	FVector2D position;
+	FVector2D sampleCenter;
+	FVector2D* viewerPosition;
+
+	TArray<AChunk_Tri*>* visibleTerrainChunks;
+	TArray<ULODMesh_Tri*> lodMeshes;
+
 	int previousLODIndex = -1;
 
-	TArray<UTriLODMesh*> lodMeshes;
-	TArray<AChunk_Tri*>* visibleTerrainChunks;
-
-	void Initialize(UTriMapThreading* MapThread, UTriMeshSettings* MeshSettings, UTriHeightMapSettings* HeightMapSettings, TArray<AChunk_Tri*>* VisibleTerrainChunks, FVector2D Coord, FVector2D& ViewerPosition);
-	void UpdateTerrainChunk();
-
-	void OnHeightMapRecieved(UObject* heightMapObject);
-	void SetTexture();
 	
+	bool IsVisible() { return meshObject->IsVisible(); }
+
 	static UTexture2D* ColorArrayToTexture(TArray<FColor> colors);
 	static UTexture2D* FloatArrayToTexture(TArray<float> convertArray);
 
+	void MakeMeshVisible(float viewerDistFromNearestChunk, bool shouldBeVisisble);
+	void SetLODMeshes(TArray<FTriLODInfo>& detailLevels);
+	void SetTexture();
 	void SetVisible(bool visible) { meshObject->SetVisibility(visible); }
-	bool IsVisible() { return meshObject->IsVisible(); }
-};
-
-UCLASS()
-class PROCEDURALTERRAIN_API UTriLODMesh : public UObject
-{
-	GENERATED_BODY()
-public:
-	FDataRecieved meshDataRecieved;
-	FVoidDelegate* updateCallback;
-
-	UProceduralMeshComponent* mesh;
-	
-	bool hasRequestedmesh;
-	bool hasMesh;
-	int lod;
-
-	UTriLODMesh();
-	void Initialize(int Lod, FVoidDelegate* UpdateCallback);
-	void OnMeshDataRecieved(UObject* meshDataObject);
-	void RequestMesh(UTri_HeightMap* heightMap, UTriMeshSettings* meshSettings, UTriMapThreading* mapThread);
 };

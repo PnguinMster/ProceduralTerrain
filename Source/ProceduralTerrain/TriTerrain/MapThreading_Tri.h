@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "TriMapThreading.generated.h"
+#include "MapThreading_Tri.generated.h"
 
 DECLARE_DELEGATE_OneParam(FDataRecieved, UObject*);
 
@@ -19,17 +19,17 @@ struct FThreadInfo
 };
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
-class PROCEDURALTERRAIN_API UTriMapThreading : public UActorComponent
+class PROCEDURALTERRAIN_API UMapThreading_Tri : public UActorComponent
 {
 	GENERATED_BODY()
-	
-public:	
-	UTriMapThreading();
+
+public:
+	UMapThreading_Tri();
 
 protected:
 	TQueue<FThreadInfo> dataQueue;
 
-public:	
+public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	void RequestData(TFunction<UObject* (void)> generateData, FDataRecieved* callback);
 };
