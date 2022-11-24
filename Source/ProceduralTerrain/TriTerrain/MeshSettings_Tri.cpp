@@ -2,5 +2,5 @@
 
 float UMeshSettings_Tri::GetMeshWorldSize()
 {
-	return (numVertsPerLine - 3) * meshScale;
+	return (numberOfVerticesPerLine - 3) * meshScale;
 }

@@ -3,7 +3,7 @@
 UMeshData_Tri* MeshGenerator_Tri::GenerateTerrainMesh(TArray<TArray<float>>& heightMap, UMeshSettings_Tri* meshSettings, int levelOfDetail)
 {
 	int meshVertexIndex = 0;
-	int verticesPerLine = meshSettings->numVertsPerLine;
+	int verticesPerLine = meshSettings->numberOfVerticesPerLine;
 	int outOfMeshVertexIndex = -1;
 	int skipIncrement = (levelOfDetail == 0) ? 1 : levelOfDetail * 2;
 

@@ -24,7 +24,7 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 		float meshScale = 10.f;
 	UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "1.0", UIMin = "1.0"))
-		int numVertsPerLine = 77;
+		int numberOfVerticesPerLine = 77;
 	UPROPERTY(EditDefaultsOnly)
 		TArray<FLODInfo_Tri> detailLevels;
 	UPROPERTY(EditDefaultsOnly)
