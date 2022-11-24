@@ -1,16 +1,15 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "TriMeshSettings.h"
 #include "ProceduralMeshComponent.h"
-#include "TriMeshGenerator.generated.h"
+#include "MeshData_Tri.generated.h"
 
 UCLASS()
-class PROCEDURALTERRAIN_API UTriMeshData : public UObject
+class PROCEDURALTERRAIN_API UMeshData_Tri : public UObject
 {
 	GENERATED_BODY()
 
-	//Mesh Info
+protected:
 	TArray<FVector>Vertices;
 	TArray<int32>Triangles;
 	TArray<FVector2D>UVs;
@@ -21,18 +20,16 @@ class PROCEDURALTERRAIN_API UTriMeshData : public UObject
 
 	int outOfMeshTriangleIndex;
 	int borderTriangleIndex;
+
 public:
 
-	UTriMeshData() {}
+	UMeshData_Tri() {}
 	void Initialize(int verticesPerLine, int skipCount);
 	void AddVertex(FVector vertexPosition, FVector2D uv, int vertexIndex);
 	void AddTraingle(int a, int b, int c);
 	void FlatShading();
 	void CreateMesh(UProceduralMeshComponent* mesh);
-};
 
-class PROCEDURALTERRAIN_API TriMeshGenerator
-{
-public:
-	static UTriMeshData* GenerateTerrainMesh(TArray<TArray<float>> heightMap, UTriMeshSettings* meshSettings, int levelOfDetail);
+protected:
+	void AddFlatShadedVertices();
 };

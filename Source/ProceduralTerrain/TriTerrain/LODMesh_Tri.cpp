@@ -1,5 +1,5 @@
 #include "LODMesh_Tri.h"
-#include "TriMeshGenerator.h"
+#include "MeshGenerator_Tri.h"
 
 ULODMesh_Tri::ULODMesh_Tri()
 {
@@ -15,7 +15,7 @@ void ULODMesh_Tri::Initialize(int Lod, FVoidDelegate* UpdateCallback)
 
 void ULODMesh_Tri::OnMeshDataRecieved(UObject* meshDataObject)
 {
-	Cast<UTriMeshData>(meshDataObject)->CreateMesh(mesh);
+	Cast<UMeshData_Tri>(meshDataObject)->CreateMesh(mesh);
 	hasMesh = true;
 
 	updateCallback->Execute();
@@ -23,7 +23,7 @@ void ULODMesh_Tri::OnMeshDataRecieved(UObject* meshDataObject)
 
 void ULODMesh_Tri::RequestMesh(UHeightMap_Tri* heightMap, UTriMeshSettings* meshSettings, UMapThreading_Tri* mapThread)
 {
-	TFunction<UObject* (void)> function = [=]() { return TriMeshGenerator::GenerateTerrainMesh(heightMap->values, meshSettings, lod); };
+	TFunction<UObject* (void)> function = [=]() { return MeshGenerator_Tri::GenerateTerrainMesh(heightMap->values, meshSettings, lod); };
 	hasRequestedmesh = true;
 
 	mapThread->RequestData(function, &meshDataRecieved);

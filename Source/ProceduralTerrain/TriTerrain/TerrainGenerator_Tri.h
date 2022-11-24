@@ -4,7 +4,7 @@
 #include "Chunk_Tri.h"
 #include "MapThreading_Tri.h"
 #include "HeightMapSettings_Tri.h"
-#include "TriMeshGenerator.h"
+#include "MeshGenerator_Tri.h"
 #include "TriMeshSettings.h"
 #include "TerrainGenerator_Tri.generated.h"
 
