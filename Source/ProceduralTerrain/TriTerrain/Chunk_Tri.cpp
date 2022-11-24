@@ -9,7 +9,7 @@ AChunk_Tri::AChunk_Tri()
 	UpdateChunkDelegate.BindUObject(this, &AChunk_Tri::UpdateChunk);
 }
 
-void AChunk_Tri::Initialize(UMapThreading_Tri* MapThread, UTriMeshSettings* MeshSettings, UHeightMapSettings_Tri* HeightMapSettings, TArray<AChunk_Tri*>* VisibleTerrainChunks, FVector2D Coord, FVector2D& ViewerPosition)
+void AChunk_Tri::Initialize(UMapThreading_Tri* MapThread, UMeshSettings_Tri* MeshSettings, UHeightMapSettings_Tri* HeightMapSettings, TArray<AChunk_Tri*>* VisibleTerrainChunks, FVector2D Coord, FVector2D& ViewerPosition)
 {
 	DataRecievedDelegate.BindUObject(this, &AChunk_Tri::OnHeightMapRecieved);
 
@@ -85,7 +85,7 @@ void AChunk_Tri::MakeMeshVisible(float viewerDistFromNearestChunk, bool shouldBe
 	}
 }
 
-void AChunk_Tri::SetLODMeshes(TArray<FTriLODInfo>& detailLevels)
+void AChunk_Tri::SetLODMeshes(TArray<FLODInfo_Tri>& detailLevels)
 {
 	lodMeshes.SetNum(detailLevels.Num());
 	for (int i = 0; i < detailLevels.Num(); i++) {

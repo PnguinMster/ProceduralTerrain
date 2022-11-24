@@ -5,7 +5,7 @@
 #include "MapThreading_Tri.h"
 #include "HeightMapSettings_Tri.h"
 #include "MeshGenerator_Tri.h"
-#include "TriMeshSettings.h"
+#include "MeshSettings_Tri.h"
 #include "TerrainGenerator_Tri.generated.h"
 
 UCLASS()
@@ -17,7 +17,7 @@ public:
 	ATerrainGenerator_Tri();
 
 	UPROPERTY(EditDefaultsOnly)
-		UTriMeshSettings* meshSettings;
+		UMeshSettings_Tri* meshSettings;
 	UPROPERTY(EditDefaultsOnly)
 		UHeightMapSettings_Tri* heightMapSettings;
 

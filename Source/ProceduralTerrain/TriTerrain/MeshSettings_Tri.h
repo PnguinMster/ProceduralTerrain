@@ -2,21 +2,21 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
-#include "TriMeshSettings.generated.h"
+#include "MeshSettings_Tri.generated.h"
 
 USTRUCT()
-struct FTriLODInfo
+struct FLODInfo_Tri
 {
 	GENERATED_BODY()
 
-		UPROPERTY(EditAnywhere, meta = (ClampMin = "1.0", UIMin = "1.0"))
+	UPROPERTY(EditAnywhere, meta = (ClampMin = "1.0", UIMin = "1.0"))
 		int visibleChunks;
 	UPROPERTY(EditAnywhere, meta = (ClampMin = "0.0", ClampMax = "6.0", UIMin = "0.0", UIMax = "6.0"))
 		int lod;
 };
 
 UCLASS()
-class PROCEDURALTERRAIN_API UTriMeshSettings : public UDataAsset
+class PROCEDURALTERRAIN_API UMeshSettings_Tri : public UDataAsset
 {
 	GENERATED_BODY()
 	
@@ -26,7 +26,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "1.0", UIMin = "1.0"))
 		int numVertsPerLine = 77;
 	UPROPERTY(EditDefaultsOnly)
-		TArray<FTriLODInfo> detailLevels;
+		TArray<FLODInfo_Tri> detailLevels;
 	UPROPERTY(EditDefaultsOnly)
 		UMaterialInterface* materialInterface;
 

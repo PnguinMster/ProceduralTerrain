@@ -16,11 +16,12 @@ void UMapThreading_Tri::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	if (!dataQueue.IsEmpty()) {
-		FThreadInfo threadInfo;
-		dataQueue.Dequeue(threadInfo);
-		threadInfo.callback->Execute(threadInfo.parameter);
-	}
+	if (dataQueue.IsEmpty())
+		return;
+
+	FThreadInfo threadInfo;
+	dataQueue.Dequeue(threadInfo);
+	threadInfo.callback->Execute(threadInfo.parameter);
 }
 
 void UMapThreading_Tri::RequestData(TFunction<UObject* (void)> generateData, FDataRecieved* callback)

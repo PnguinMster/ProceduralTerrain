@@ -21,7 +21,7 @@ void ULODMesh_Tri::OnMeshDataRecieved(UObject* meshDataObject)
 	updateCallback->Execute();
 }
 
-void ULODMesh_Tri::RequestMesh(UHeightMap_Tri* heightMap, UTriMeshSettings* meshSettings, UMapThreading_Tri* mapThread)
+void ULODMesh_Tri::RequestMesh(UHeightMap_Tri* heightMap, UMeshSettings_Tri* meshSettings, UMapThreading_Tri* mapThread)
 {
 	TFunction<UObject* (void)> function = [=]() { return MeshGenerator_Tri::GenerateTerrainMesh(heightMap->values, meshSettings, lod); };
 	hasRequestedmesh = true;

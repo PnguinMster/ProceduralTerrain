@@ -1,6 +1,6 @@
 #include "MeshGenerator_Tri.h"
 
-UMeshData_Tri* MeshGenerator_Tri::GenerateTerrainMesh(TArray<TArray<float>>& heightMap, UTriMeshSettings* meshSettings, int levelOfDetail)
+UMeshData_Tri* MeshGenerator_Tri::GenerateTerrainMesh(TArray<TArray<float>>& heightMap, UMeshSettings_Tri* meshSettings, int levelOfDetail)
 {
 	int meshVertexIndex = 0;
 	int verticesPerLine = meshSettings->numVertsPerLine;
@@ -41,7 +41,7 @@ void MeshGenerator_Tri::SetVertexIndexMap(TArray<TArray<int>>& vertexIndexMap, i
 	}
 }
 
-void MeshGenerator_Tri::CreateTopology(UMeshData_Tri* meshData, UTriMeshSettings* meshSettings, int verticesPerLine, int skipIncrement, TArray<TArray<int>>& vertexIndexMap, TArray<TArray<float>>& heightMap)
+void MeshGenerator_Tri::CreateTopology(UMeshData_Tri* meshData, UMeshSettings_Tri* meshSettings, int verticesPerLine, int skipIncrement, TArray<TArray<int>>& vertexIndexMap, TArray<TArray<float>>& heightMap)
 {
 	FVector2D topLeft = FVector2D(-1, 1) * meshSettings->GetMeshWorldSize() / 2.f;
 

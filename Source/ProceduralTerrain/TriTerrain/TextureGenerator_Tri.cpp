@@ -1,7 +1,7 @@
 #include "TextureGenerator_Tri.h"
 #include "Kismet/KismetMathLibrary.h"
 
-UMaterialInstanceDynamic* TextureGenerator_Tri::CreateMaterialInstance(UTriMeshSettings* meshSettings, UHeightMapSettings_Tri* heightMapSettings, UObject* inOuter)
+UMaterialInstanceDynamic* TextureGenerator_Tri::CreateMaterialInstance(UMeshSettings_Tri* meshSettings, UHeightMapSettings_Tri* heightMapSettings, UObject* inOuter)
 {
 	int regionsCount = heightMapSettings->regions.Num();
 

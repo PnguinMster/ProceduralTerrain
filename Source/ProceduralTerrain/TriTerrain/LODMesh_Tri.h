@@ -4,7 +4,7 @@
 #include "MapThreading_Tri.h"
 #include "ProceduralMeshComponent.h"
 #include "HeightMapSettings_Tri.h"
-#include "TriMeshSettings.h"
+#include "MeshSettings_Tri.h"
 #include "LODMesh_Tri.generated.h"
 
 DECLARE_DELEGATE(FVoidDelegate);
@@ -27,5 +27,5 @@ public:
 	ULODMesh_Tri();
 	void Initialize(int Lod, FVoidDelegate* UpdateCallback);
 	void OnMeshDataRecieved(UObject* meshDataObject);
-	void RequestMesh(UHeightMap_Tri* heightMap, UTriMeshSettings* meshSettings, UMapThreading_Tri* mapThread);
+	void RequestMesh(UHeightMap_Tri* heightMap, UMeshSettings_Tri* meshSettings, UMapThreading_Tri* mapThread);
 };
