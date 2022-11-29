@@ -29,7 +29,7 @@ void AChunk_Tri::Initialize(UMapThreading_Tri* MapThread, UMeshSettings_Tri* Mes
 	meshObject->SetMaterial(0, TextureGenerator_Tri::CreateMaterialInstance(meshSettings, heightMapSettings, this));
 	meshObject->SetWorldLocation(FVector(chunkPosition.X, chunkPosition.Y, 0));
 
-	TFunction<UObject* (void)> function = [=]() {return HeightMapGenerator_Tri::GenerateHeightMap(meshSettings->numberOfVerticesPerLine, meshSettings->numberOfVerticesPerLine, heightMapSettings, sampleCenter); };
+	TFunction<UObject* (void)> function = [=]() {return HeightMapGenerator_Tri::GenerateHeightMap(meshSettings->GetNumberVerticesPerLine(), meshSettings->GetNumberVerticesPerLine(), heightMapSettings, sampleCenter); };
 	mapThread->RequestData(function, &DataRecievedDelegate);
 }
 
