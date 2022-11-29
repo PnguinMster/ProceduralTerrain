@@ -15,11 +15,11 @@ protected:
 	TArray<FVector2D>UVs;
 	TArray<FVector>Normals;
 
-	TArray<FVector> outOfMeshVertices;
-	TArray<int> outOfMeshTraingles;
+	TArray<FVector> OutOfMeshVertices;
+	TArray<int> OutOfMeshTraingles;
 
-	int outOfMeshTriangleIndex;
-	int borderTriangleIndex;
+	int OutOfMeshTriangleIndex;
+	int BorderTriangleIndex;
 
 public:
 

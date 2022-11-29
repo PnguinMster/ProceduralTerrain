@@ -4,50 +4,50 @@
 
 AChunk_Tri::AChunk_Tri()
 {
-	meshObject = CreateDefaultSubobject<UProceduralMeshComponent>(TEXT("Mesh"));
-	RootComponent = meshObject;
+	MeshObject = CreateDefaultSubobject<UProceduralMeshComponent>(TEXT("Mesh"));
+	RootComponent = MeshObject;
 	UpdateChunkDelegate.BindUObject(this, &AChunk_Tri::UpdateChunk);
 }
 
-void AChunk_Tri::Initialize(UMapThreading_Tri* MapThread, UMeshSettings_Tri* MeshSettings, UHeightMapSettings_Tri* HeightMapSettings, TArray<AChunk_Tri*>* VisibleTerrainChunks, FVector2D Coord, FVector2D& ViewerPosition)
+void AChunk_Tri::Initialize(UMapThreading_Tri* mapThread, UMeshSettings_Tri* meshSettings, UHeightMapSettings_Tri* heightMapSettings, TArray<AChunk_Tri*>* visibleTerrainChunks, FVector2D coord, FVector2D& viewerPosition)
 {
 	DataRecievedDelegate.BindUObject(this, &AChunk_Tri::OnHeightMapRecieved);
 
-	mapThread = MapThread;
-	meshSettings = MeshSettings;
-	heightMapSettings = HeightMapSettings;
-	coord = Coord;
-	visibleTerrainChunks = VisibleTerrainChunks;
-	viewerPosition = &ViewerPosition;
+	MapThread = mapThread;
+	MeshSettings = meshSettings;
+	HeightMapSettings = heightMapSettings;
+	Coord = coord;
+	VisibleTerrainChunks = visibleTerrainChunks;
+	ViewerPosition = &viewerPosition;
 
-	FVector2D chunkPosition = Coord * meshSettings->GetMeshWorldSize();
-	sampleCenter = chunkPosition / meshSettings->meshScale;
+	FVector2D chunkPosition = coord * meshSettings->GetMeshWorldSize();
+	SampleCenter = chunkPosition / meshSettings->MeshScale;
 
-	SetLODMeshes(meshSettings->detailLevels);
+	SetLODMeshes(meshSettings->DetailLevels);
 	SetVisible(false);
 
-	meshObject->SetMaterial(0, TextureGenerator_Tri::CreateMaterialInstance(meshSettings, heightMapSettings, this));
-	meshObject->SetWorldLocation(FVector(chunkPosition.X, chunkPosition.Y, 0));
+	MeshObject->SetMaterial(0, TextureGenerator_Tri::CreateMaterialInstance(meshSettings, heightMapSettings, this));
+	MeshObject->SetWorldLocation(FVector(chunkPosition.X, chunkPosition.Y, 0));
 
-	TFunction<UObject* (void)> function = [=]() {return HeightMapGenerator_Tri::GenerateHeightMap(meshSettings->GetNumberVerticesPerLine(), meshSettings->GetNumberVerticesPerLine(), heightMapSettings, sampleCenter); };
+	TFunction<UObject* (void)> function = [=]() {return HeightMapGenerator_Tri::GenerateHeightMap(meshSettings->GetNumberVerticesPerLine(), meshSettings->GetNumberVerticesPerLine(), heightMapSettings, SampleCenter); };
 	mapThread->RequestData(function, &DataRecievedDelegate);
 }
 
 void AChunk_Tri::UpdateChunk()
 {
-	if (!heightMapRecieved)
+	if (!HeightMapRecieved)
 		return;
 
-	float viewerDistFromNearestChunk = FVector2D::Distance(FVector2D(GetActorLocation().X, GetActorLocation().Y), *viewerPosition);
-	bool shouldBeVisible = viewerDistFromNearestChunk <= meshSettings->detailLevels[meshSettings->detailLevels.Num() - 1].visibleChunks * meshSettings->GetMeshWorldSize();
+	float viewerDistFromNearestChunk = FVector2D::Distance(FVector2D(GetActorLocation().X, GetActorLocation().Y), *ViewerPosition);
+	bool shouldBeVisible = viewerDistFromNearestChunk <= MeshSettings->DetailLevels[MeshSettings->DetailLevels.Num() - 1].VisibleChunks * MeshSettings->GetMeshWorldSize();
 
 	MakeMeshVisible(viewerDistFromNearestChunk, shouldBeVisible);
 
 	if (IsVisible() != shouldBeVisible) {
 		if (shouldBeVisible)
-			visibleTerrainChunks->Add(this);
+			VisibleTerrainChunks->Add(this);
 		else
-			visibleTerrainChunks->Remove(this);
+			VisibleTerrainChunks->Remove(this);
 	}
 
 	SetVisible(shouldBeVisible);
@@ -55,8 +55,8 @@ void AChunk_Tri::UpdateChunk()
 
 void AChunk_Tri::OnHeightMapRecieved(UObject* heightMapObject)
 {
-	mapData = Cast<UHeightMap_Tri>(heightMapObject);
-	heightMapRecieved = true;
+	MapData = Cast<UHeightMap_Tri>(heightMapObject);
+	HeightMapRecieved = true;
 
 	UpdateChunk();
 }
@@ -67,29 +67,29 @@ void AChunk_Tri::MakeMeshVisible(float viewerDistFromNearestChunk, bool shouldBe
 		return;
 
 	int lodIndex = 0;
-	for (int i = 0; i < meshSettings->detailLevels.Num() - 1; i++) {
-		if (viewerDistFromNearestChunk > meshSettings->detailLevels[i].visibleChunks * meshSettings->GetMeshWorldSize())
+	for (int i = 0; i < MeshSettings->DetailLevels.Num() - 1; i++) {
+		if (viewerDistFromNearestChunk > MeshSettings->DetailLevels[i].VisibleChunks * MeshSettings->GetMeshWorldSize())
 			lodIndex = i + 1;
 		else
 			break;
 	}
 
-	if (lodIndex != previousLODIndex) {
-		ULODMesh_Tri* lodMesh = lodMeshes[lodIndex];
-		if (lodMesh->hasMesh) {
-			previousLODIndex = lodIndex;
-			meshObject->SetProcMeshSection(0, *lodMesh->mesh->GetProcMeshSection(0));
+	if (lodIndex != PreviousLODIndex) {
+		ULODMesh_Tri* lodMesh = LodMeshes[lodIndex];
+		if (lodMesh->HasMesh) {
+			PreviousLODIndex = lodIndex;
+			MeshObject->SetProcMeshSection(0, *lodMesh->Mesh->GetProcMeshSection(0));
 		}
-		else if (!lodMesh->hasRequestedmesh)
-			lodMesh->RequestMesh(mapData, meshSettings, mapThread);
+		else if (!lodMesh->HasRequestedmesh)
+			lodMesh->RequestMesh(MapData, MeshSettings, MapThread);
 	}
 }
 
 void AChunk_Tri::SetLODMeshes(TArray<FLODInfo_Tri>& detailLevels)
 {
-	lodMeshes.SetNum(detailLevels.Num());
+	LodMeshes.SetNum(detailLevels.Num());
 	for (int i = 0; i < detailLevels.Num(); i++) {
-		lodMeshes[i] = NewObject<ULODMesh_Tri>();
-		lodMeshes[i]->Initialize(detailLevels[i].lod, &UpdateChunkDelegate);
+		LodMeshes[i] = NewObject<ULODMesh_Tri>();
+		LodMeshes[i]->Initialize(detailLevels[i].Lod, &UpdateChunkDelegate);
 	}
 }

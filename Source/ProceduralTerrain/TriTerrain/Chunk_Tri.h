@@ -14,32 +14,32 @@ public:
 
 	FDataRecieved DataRecievedDelegate;
 	FVoidDelegate UpdateChunkDelegate;
-	FVector2D coord;
+	FVector2D Coord;
 
-	bool heightMapRecieved;
+	bool HeightMapRecieved;
 
-	void Initialize(UMapThreading_Tri* MapThread, UMeshSettings_Tri* MeshSettings, UHeightMapSettings_Tri* HeightMapSettings, TArray<AChunk_Tri*>* VisibleTerrainChunks, FVector2D Coord, FVector2D& ViewerPosition);
+	void Initialize(UMapThreading_Tri* mapThread, UMeshSettings_Tri* meshSettings, UHeightMapSettings_Tri* heightMapSettings, TArray<AChunk_Tri*>* visibleTerrainChunks, FVector2D coord, FVector2D& viewerPosition);
 	void UpdateChunk();
 	void OnHeightMapRecieved(UObject* heightMapObject);
 
 protected:
-	UMapThreading_Tri* mapThread;
-	UProceduralMeshComponent* meshObject;
-	UHeightMap_Tri* mapData;
-	UHeightMapSettings_Tri* heightMapSettings;
-	UMeshSettings_Tri* meshSettings;
+	UMapThreading_Tri* MapThread;
+	UProceduralMeshComponent* MeshObject;
+	UHeightMap_Tri* MapData;
+	UHeightMapSettings_Tri* HeightMapSettings;
+	UMeshSettings_Tri* MeshSettings;
 
-	FVector2D sampleCenter;
-	FVector2D* viewerPosition;
+	FVector2D SampleCenter;
+	FVector2D* ViewerPosition;
 
-	TArray<AChunk_Tri*>* visibleTerrainChunks;
-	TArray<ULODMesh_Tri*> lodMeshes;
+	TArray<AChunk_Tri*>* VisibleTerrainChunks;
+	TArray<ULODMesh_Tri*> LodMeshes;
 
-	int previousLODIndex = -1;
+	int PreviousLODIndex = -1;
 	
-	bool IsVisible() { return meshObject->IsVisible(); }
+	bool IsVisible() { return MeshObject->IsVisible(); }
 
 	void MakeMeshVisible(float viewerDistFromNearestChunk, bool shouldBeVisisble);
 	void SetLODMeshes(TArray<FLODInfo_Tri>& detailLevels);
-	void SetVisible(bool visible) { meshObject->SetVisibility(visible); }
+	void SetVisible(bool visible) { MeshObject->SetVisibility(visible); }
 };

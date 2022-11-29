@@ -14,20 +14,20 @@ TArray<TArray<float>> NoiseMap_Tri::GenerateNoiseMap(int mapWidth, int mapHeight
 	TArray<TArray<float>> noiseMap;
 	Set2DArrayNum(noiseMap, mapWidth, mapHeight);
 
-	FRandomStream* prng = new FRandomStream(settings.seed);
+	FRandomStream* prng = new FRandomStream(settings.Seed);
 	TArray<FVector2D> ocataveOffsets;
-	ocataveOffsets.SetNum(settings.octaves);
+	ocataveOffsets.SetNum(settings.Octaves);
 	float maxPossibleHeight = 0;
 	float amplitude = 1;
 	float frequency = 1;
 
-	for (int i = 0; i < settings.octaves; i++) {
-		float offsetX = prng->FRandRange(-100000, 100000) + settings.offset.X + sampleCenter.X;
-		float offsetY = prng->FRandRange(-100000, 100000) - settings.offset.Y - sampleCenter.Y;
+	for (int i = 0; i < settings.Octaves; i++) {
+		float offsetX = prng->FRandRange(-100000, 100000) + settings.Offset.X + sampleCenter.X;
+		float offsetY = prng->FRandRange(-100000, 100000) - settings.Offset.Y - sampleCenter.Y;
 		ocataveOffsets[i].Set(offsetX, offsetY);
 
 		maxPossibleHeight += amplitude;
-		amplitude *= settings.persistance;
+		amplitude *= settings.Persistance;
 	}
 
 	float maxLocalNoiseHeight = TNumericLimits<float>::Min();
@@ -42,15 +42,15 @@ TArray<TArray<float>> NoiseMap_Tri::GenerateNoiseMap(int mapWidth, int mapHeight
 			frequency = 1;
 			float noiseHeight = 0;
 
-			for (int i = 0; i < settings.octaves; i++) {
-				FVector2D sample = FVector2D((x - halfWidth+ ocataveOffsets[i].X) / settings.scale * frequency , (y - halfHeight + ocataveOffsets[i].Y) / settings.scale * frequency);
+			for (int i = 0; i < settings.Octaves; i++) {
+				FVector2D sample = FVector2D((x - halfWidth+ ocataveOffsets[i].X) / settings.Scale * frequency , (y - halfHeight + ocataveOffsets[i].Y) / settings.Scale * frequency);
 
 				//Can remove *2 and -1 for variance
 				float perlinValue = FMath::PerlinNoise2D(sample) * 2.f - 1;
 				noiseHeight += perlinValue * amplitude;
 
-				amplitude *= settings.persistance;
-				frequency *= settings.lacunarity;
+				amplitude *= settings.Persistance;
+				frequency *= settings.Lacunarity;
 			}
 
 			if (noiseHeight > maxLocalNoiseHeight)

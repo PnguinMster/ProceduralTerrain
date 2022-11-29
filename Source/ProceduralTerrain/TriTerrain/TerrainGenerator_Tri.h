@@ -17,9 +17,9 @@ public:
 	ATerrainGenerator_Tri();
 
 	UPROPERTY(EditDefaultsOnly)
-		UMeshSettings_Tri* meshSettings;
+		UMeshSettings_Tri* MeshSettings;
 	UPROPERTY(EditDefaultsOnly)
-		UHeightMapSettings_Tri* heightMapSettings;
+		UHeightMapSettings_Tri* HeightMapSettings;
 
 protected:
 	virtual void BeginPlay() override;
@@ -27,17 +27,17 @@ protected:
 	void UpdateVisibleChunk();
 	void CreateChunk(FVector2D& viewedChunkCoord);
 
-	const float moveThresholdForChunkUpdate = 300.f;
-	int chunksVisibleInView;
+	const float MoveThresholdForChunkUpdate = 300.f;
+	int ChunksVisibleInView;
 
-	TMap<FVector2D, AChunk_Tri*> chunkMap;
-	TArray<AChunk_Tri*> visibleChunks;
+	TMap<FVector2D, AChunk_Tri*> ChunkMap;
+	TArray<AChunk_Tri*> VisibleChunks;
 
-	UMapThreading_Tri* mapThread;
+	UMapThreading_Tri* MapThread;
 	APawn* ViewerPawn;
 
-	FVector2D viewerPosition;
-	FVector2D viewerPositionOld;
+	FVector2D ViewerPosition;
+	FVector2D ViewerPositionOld;
 public:
-	virtual void Tick(float DeltaTime) override;
+	virtual void Tick(float deltaTime) override;
 };

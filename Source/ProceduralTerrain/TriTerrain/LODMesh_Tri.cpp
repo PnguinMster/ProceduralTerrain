@@ -3,28 +3,28 @@
 
 ULODMesh_Tri::ULODMesh_Tri()
 {
-	mesh = CreateDefaultSubobject<UProceduralMeshComponent>(TEXT("Mesh"));
-	meshDataRecieved.BindUObject(this, &ULODMesh_Tri::OnMeshDataRecieved);
+	Mesh = CreateDefaultSubobject<UProceduralMeshComponent>(TEXT("Mesh"));
+	MeshDataRecieved.BindUObject(this, &ULODMesh_Tri::OnMeshDataRecieved);
 }
 
-void ULODMesh_Tri::Initialize(int Lod, FVoidDelegate* UpdateCallback)
+void ULODMesh_Tri::Initialize(int lod, FVoidDelegate* updateCallback)
 {
-	lod = Lod;
-	updateCallback = UpdateCallback;
+	Lod = lod;
+	UpdateCallback = updateCallback;
 }
 
 void ULODMesh_Tri::OnMeshDataRecieved(UObject* meshDataObject)
 {
-	Cast<UMeshData_Tri>(meshDataObject)->CreateMesh(mesh);
-	hasMesh = true;
+	Cast<UMeshData_Tri>(meshDataObject)->CreateMesh(Mesh);
+	HasMesh = true;
 
-	updateCallback->Execute();
+	UpdateCallback->Execute();
 }
 
 void ULODMesh_Tri::RequestMesh(UHeightMap_Tri* heightMap, UMeshSettings_Tri* meshSettings, UMapThreading_Tri* mapThread)
 {
-	TFunction<UObject* (void)> function = [=]() { return MeshGenerator_Tri::GenerateTerrainMesh(heightMap->values, meshSettings, lod); };
-	hasRequestedmesh = true;
+	TFunction<UObject* (void)> function = [=]() { return MeshGenerator_Tri::GenerateTerrainMesh(heightMap->Values, meshSettings, Lod); };
+	HasRequestedmesh = true;
 
-	mapThread->RequestData(function, &meshDataRecieved);
+	mapThread->RequestData(function, &MeshDataRecieved);
 }

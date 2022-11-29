@@ -3,7 +3,7 @@
 
 UMaterialInstanceDynamic* TextureGenerator_Tri::CreateMaterialInstance(UMeshSettings_Tri* meshSettings, UHeightMapSettings_Tri* heightMapSettings, UObject* inOuter)
 {
-	int regionsCount = heightMapSettings->regions.Num();
+	int regionsCount = heightMapSettings->Regions.Num();
 
 	TArray<FColor> colors;
 	TArray<float> heights;
@@ -14,16 +14,16 @@ UMaterialInstanceDynamic* TextureGenerator_Tri::CreateMaterialInstance(UMeshSett
 	blends.SetNum(regionsCount);
 
 	for (int i = 0; i < regionsCount; i++) {
-		colors[i] = heightMapSettings->regions[i].color;
-		heights[i] = heightMapSettings->regions[i].height;
-		blends[i] = heightMapSettings->regions[i].blend;
+		colors[i] = heightMapSettings->Regions[i].Color;
+		heights[i] = heightMapSettings->Regions[i].Height;
+		blends[i] = heightMapSettings->Regions[i].Blend;
 	}
 
 	UTexture2D* colorTexture = ColorArrayToTexture(colors);
 	UTexture2D* heightTexture = FloatArrayToTexture(heights);
 	UTexture2D* blendTexture = FloatArrayToTexture(blends);
 
-	UMaterialInstanceDynamic* dynamicMaterialInstance = UMaterialInstanceDynamic::Create(meshSettings->materialInterface, inOuter);
+	UMaterialInstanceDynamic* dynamicMaterialInstance = UMaterialInstanceDynamic::Create(meshSettings->MaterialInterface, inOuter);
 	dynamicMaterialInstance->SetScalarParameterValue("MinHeight", heightMapSettings->GetMinHeight());
 	dynamicMaterialInstance->SetScalarParameterValue("MaxHeight", heightMapSettings->GetMaxHeight());
 	dynamicMaterialInstance->SetScalarParameterValue("RegionCount", regionsCount);

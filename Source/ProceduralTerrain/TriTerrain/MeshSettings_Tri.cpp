@@ -18,10 +18,10 @@ UMeshSettings_Tri::UMeshSettings_Tri()
 
 int UMeshSettings_Tri::GetNumberVerticesPerLine()
 {
-	return SupportedChunkSizes[chunkSizeIndex] + 5;
+	return SupportedChunkSizes[ChunkSizeIndex] + 5;
 }
 
 float UMeshSettings_Tri::GetMeshWorldSize()
 {
-	return (GetNumberVerticesPerLine() - 3) * meshScale;
+	return (GetNumberVerticesPerLine() - 3) * MeshScale;
 }

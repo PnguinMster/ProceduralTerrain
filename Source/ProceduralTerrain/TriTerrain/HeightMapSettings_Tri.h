@@ -9,12 +9,12 @@ USTRUCT()
 struct FTerrainType_Tri {
 	GENERATED_BODY()
 
-		UPROPERTY(EditAnywhere, meta = (ClampMin = "0.0", ClampMax = "1.0", UIMin = "0.0", UIMax = "1.0"))
-		float height;
 	UPROPERTY(EditAnywhere, meta = (ClampMin = "0.0", ClampMax = "1.0", UIMin = "0.0", UIMax = "1.0"))
-		float blend;
+		float Height;
+	UPROPERTY(EditAnywhere, meta = (ClampMin = "0.0", ClampMax = "1.0", UIMin = "0.0", UIMax = "1.0"))
+		float Blend;
 	UPROPERTY(EditAnywhere)
-		FColor color;
+		FColor Color;
 };
 
 UCLASS()
@@ -24,14 +24,14 @@ class PROCEDURALTERRAIN_API UHeightMapSettings_Tri : public UDataAsset
 	
 public:
 	UPROPERTY(EditDefaultsOnly)
-	FNoiseSettings_Tri noiseSettings;
+	FNoiseSettings_Tri NoiseSettings;
 
 	UPROPERTY(EditDefaultsOnly)
-		float heightMultiplier = 300.f;
+		float HeightMultiplier = 300.f;
 	UPROPERTY(EditDefaultsOnly)
-		UCurveFloat* heightCurve;
+		UCurveFloat* HeightCurve;
 	UPROPERTY(EditDefaultsOnly)
-		TArray<FTerrainType_Tri> regions;
+		TArray<FTerrainType_Tri> Regions;
 
 	float GetMinHeight();
 	float GetMaxHeight();
@@ -43,10 +43,10 @@ class PROCEDURALTERRAIN_API UHeightMap_Tri : public UObject
 	GENERATED_BODY()
 
 public:
-	TArray<TArray<float>> values;
-	float minValue;
-	float maxValue;
+	TArray<TArray<float>> Values;
+	float MinValue;
+	float MaxValue;
 
 	UHeightMap_Tri() {};
-	void Initialize(TArray<TArray<float>> Values, float MinValue, float MaxValue);
+	void Initialize(TArray<TArray<float>> values, float minValue, float maxValue);
 };

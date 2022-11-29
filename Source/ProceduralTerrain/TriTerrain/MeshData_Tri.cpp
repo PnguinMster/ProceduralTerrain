@@ -14,14 +14,14 @@ void UMeshData_Tri::Initialize(int numVertsPerLine, int skipIncrement)
 	int numMainTriangles = (numMainVerticesPerLine - 1) * (numMainVerticesPerLine - 1) * 2;
 	Triangles.SetNum((numMeshEdgeTriangles + numMainTriangles) * 3);
 
-	outOfMeshVertices.SetNum(numVertsPerLine * 4 - 4);
-	outOfMeshTraingles.SetNum(24 * (numVertsPerLine - 2));
+	OutOfMeshVertices.SetNum(numVertsPerLine * 4 - 4);
+	OutOfMeshTraingles.SetNum(24 * (numVertsPerLine - 2));
 }
 
 void UMeshData_Tri::AddVertex(FVector vertexPosition, FVector2D uv, int vertexIndex)
 {
 	if (vertexIndex < 0)
-		outOfMeshVertices[-vertexIndex - 1] = vertexPosition;
+		OutOfMeshVertices[-vertexIndex - 1] = vertexPosition;
 	else {
 		Vertices[vertexIndex] = vertexPosition;
 		UVs[vertexIndex] = uv;
@@ -31,16 +31,16 @@ void UMeshData_Tri::AddVertex(FVector vertexPosition, FVector2D uv, int vertexIn
 void UMeshData_Tri::AddTraingle(int a, int b, int c)
 {
 	if (a < 0 || b < 0 || c < 0) {
-		outOfMeshTraingles[borderTriangleIndex] = a;
-		outOfMeshTraingles[borderTriangleIndex + 1] = b;
-		outOfMeshTraingles[borderTriangleIndex + 2] = c;
-		borderTriangleIndex += 3;
+		OutOfMeshTraingles[BorderTriangleIndex] = a;
+		OutOfMeshTraingles[BorderTriangleIndex + 1] = b;
+		OutOfMeshTraingles[BorderTriangleIndex + 2] = c;
+		BorderTriangleIndex += 3;
 	}
 	else {
-		Triangles[outOfMeshTriangleIndex] = a;
-		Triangles[outOfMeshTriangleIndex + 1] = b;
-		Triangles[outOfMeshTriangleIndex + 2] = c;
-		outOfMeshTriangleIndex += 3;
+		Triangles[OutOfMeshTriangleIndex] = a;
+		Triangles[OutOfMeshTriangleIndex + 1] = b;
+		Triangles[OutOfMeshTriangleIndex + 2] = c;
+		OutOfMeshTriangleIndex += 3;
 	}
 }
 

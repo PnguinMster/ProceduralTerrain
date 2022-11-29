@@ -5,27 +5,27 @@ ATerrainGenerator_Tri::ATerrainGenerator_Tri()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
-	mapThread = CreateDefaultSubobject<UMapThreading_Tri>(TEXT("MapThreader"));
+	MapThread = CreateDefaultSubobject<UMapThreading_Tri>(TEXT("MapThreader"));
 }
 
 void ATerrainGenerator_Tri::BeginPlay()
 {
 	Super::BeginPlay();
 
-	chunksVisibleInView = meshSettings->detailLevels[meshSettings->detailLevels.Num() - 1].visibleChunks;
+	ChunksVisibleInView = MeshSettings->DetailLevels[MeshSettings->DetailLevels.Num() - 1].VisibleChunks;
 	ViewerPawn = GetWorld()->GetFirstPlayerController()->GetPawn();
 
 	UpdateVisibleChunk();
 }
 
-void ATerrainGenerator_Tri::Tick(float DeltaTime)
+void ATerrainGenerator_Tri::Tick(float deltaTime)
 {
-	Super::Tick(DeltaTime);
+	Super::Tick(deltaTime);
 
-	viewerPosition.Set(ViewerPawn->GetActorLocation().X, ViewerPawn->GetActorLocation().Y);
+	ViewerPosition.Set(ViewerPawn->GetActorLocation().X, ViewerPawn->GetActorLocation().Y);
 
-	if (FVector2D::Distance(viewerPosition, viewerPositionOld) > moveThresholdForChunkUpdate) {
-		viewerPositionOld = viewerPosition;
+	if (FVector2D::Distance(ViewerPosition, ViewerPositionOld) > MoveThresholdForChunkUpdate) {
+		ViewerPositionOld = ViewerPosition;
 		UpdateVisibleChunk();
 	}
 }
@@ -33,25 +33,25 @@ void ATerrainGenerator_Tri::Tick(float DeltaTime)
 void ATerrainGenerator_Tri::UpdateVisibleChunk()
 {
 	TSet<FVector2D> updatedChunkCoords;
-	for (int i = visibleChunks.Num() - 1; i >= 0; i--) {
-		updatedChunkCoords.Add(visibleChunks[i]->coord);
-		visibleChunks[i]->UpdateChunk();
+	for (int i = VisibleChunks.Num() - 1; i >= 0; i--) {
+		updatedChunkCoords.Add(VisibleChunks[i]->Coord);
+		VisibleChunks[i]->UpdateChunk();
 	}
 
-	int currentChunkCoordX = FMath::RoundToInt(viewerPosition.X / meshSettings->GetMeshWorldSize());
-	int currentChunkCoordY = FMath::RoundToInt(viewerPosition.Y / meshSettings->GetMeshWorldSize());
+	int currentChunkCoordX = FMath::RoundToInt(ViewerPosition.X / MeshSettings->GetMeshWorldSize());
+	int currentChunkCoordY = FMath::RoundToInt(ViewerPosition.Y / MeshSettings->GetMeshWorldSize());
 
-	for (int yOffset = -chunksVisibleInView; yOffset <= chunksVisibleInView; yOffset++) {
-		for (int xOffset = -chunksVisibleInView; xOffset <= chunksVisibleInView; xOffset++) {
+	for (int yOffset = -ChunksVisibleInView; yOffset <= ChunksVisibleInView; yOffset++) {
+		for (int xOffset = -ChunksVisibleInView; xOffset <= ChunksVisibleInView; xOffset++) {
 			FVector2D viewedChunkCoord = FVector2D(currentChunkCoordX + xOffset, currentChunkCoordY + yOffset);
 
 			if (updatedChunkCoords.Contains(viewedChunkCoord))
 				continue;
 
-			if (chunkMap.Contains(viewedChunkCoord))
-				chunkMap[viewedChunkCoord]->UpdateChunk();
+			if (ChunkMap.Contains(viewedChunkCoord))
+				ChunkMap[viewedChunkCoord]->UpdateChunk();
 
-			if (!chunkMap.Contains(viewedChunkCoord))
+			if (!ChunkMap.Contains(viewedChunkCoord))
 				CreateChunk(viewedChunkCoord);
 		}
 	}
@@ -62,9 +62,9 @@ void ATerrainGenerator_Tri::CreateChunk(FVector2D& viewedChunkCoord)
 	const FTransform SpawnLocAndRotation;
 
 	AChunk_Tri* chunk = GetWorld()->SpawnActorDeferred<AChunk_Tri>(AChunk_Tri::StaticClass(), SpawnLocAndRotation);
-	chunk->Initialize(mapThread, meshSettings, heightMapSettings, &visibleChunks, viewedChunkCoord, viewerPosition);
+	chunk->Initialize(MapThread, MeshSettings, HeightMapSettings, &VisibleChunks, viewedChunkCoord, ViewerPosition);
 
-	chunkMap.Add(viewedChunkCoord, chunk);
+	ChunkMap.Add(viewedChunkCoord, chunk);
 
 	chunk->FinishSpawning(SpawnLocAndRotation);
 	chunk->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);

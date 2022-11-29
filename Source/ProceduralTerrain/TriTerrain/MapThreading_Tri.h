@@ -11,8 +11,8 @@ struct FThreadInfo
 {
 	GENERATED_BODY()
 
-	FDataRecieved* callback = nullptr;
-	UObject* parameter = nullptr;
+	FDataRecieved* Callback = nullptr;
+	UObject* Parameter = nullptr;
 
 	FThreadInfo() {};
 	FThreadInfo(FDataRecieved* callback, UObject* parameter);
@@ -27,9 +27,9 @@ public:
 	UMapThreading_Tri();
 
 protected:
-	TQueue<FThreadInfo> dataQueue;
+	TQueue<FThreadInfo> DataQueue;
 
 public:
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	virtual void TickComponent(float deltaTime, ELevelTick tickType, FActorComponentTickFunction* thisTickFunction) override;
 	void RequestData(TFunction<UObject* (void)> generateData, FDataRecieved* callback);
 };

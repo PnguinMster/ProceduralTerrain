@@ -15,17 +15,17 @@ class PROCEDURALTERRAIN_API ULODMesh_Tri : public UObject
 	GENERATED_BODY()
 
 public:
-	FDataRecieved meshDataRecieved;
-	FVoidDelegate* updateCallback;
+	FDataRecieved MeshDataRecieved;
+	FVoidDelegate* UpdateCallback;
 
-	UProceduralMeshComponent* mesh;
+	UProceduralMeshComponent* Mesh;
 
-	bool hasMesh;
-	bool hasRequestedmesh;
-	int lod;
+	bool HasMesh;
+	bool HasRequestedmesh;
+	int Lod;
 
 	ULODMesh_Tri();
-	void Initialize(int Lod, FVoidDelegate* UpdateCallback);
+	void Initialize(int lod, FVoidDelegate* updateCallback);
 	void OnMeshDataRecieved(UObject* meshDataObject);
 	void RequestMesh(UHeightMap_Tri* heightMap, UMeshSettings_Tri* meshSettings, UMapThreading_Tri* mapThread);
 };

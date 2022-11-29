@@ -3,8 +3,8 @@
 
 FThreadInfo::FThreadInfo(FDataRecieved* callback, UObject* parameter)
 {
-	this->callback = callback;
-	this->parameter = parameter;
+	Callback = callback;
+	Parameter = parameter;
 }
 
 UMapThreading_Tri::UMapThreading_Tri()
@@ -12,16 +12,16 @@ UMapThreading_Tri::UMapThreading_Tri()
 	PrimaryComponentTick.bCanEverTick = true;
 }
 
-void UMapThreading_Tri::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void UMapThreading_Tri::TickComponent(float deltaTime, ELevelTick tickType, FActorComponentTickFunction* thisTickFunction)
 {
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	Super::TickComponent(deltaTime, tickType, thisTickFunction);
 
-	if (dataQueue.IsEmpty())
+	if (DataQueue.IsEmpty())
 		return;
 
 	FThreadInfo threadInfo;
-	dataQueue.Dequeue(threadInfo);
-	threadInfo.callback->Execute(threadInfo.parameter);
+	DataQueue.Dequeue(threadInfo);
+	threadInfo.Callback->Execute(threadInfo.Parameter);
 }
 
 void UMapThreading_Tri::RequestData(TFunction<UObject* (void)> generateData, FDataRecieved* callback)
@@ -29,7 +29,7 @@ void UMapThreading_Tri::RequestData(TFunction<UObject* (void)> generateData, FDa
 	AsyncTask(ENamedThreads::AnyHiPriThreadNormalTask, [generateData, callback, this]() {
 		UObject* data = generateData();
 		AsyncTask(ENamedThreads::GameThread, [callback, data, this]() {
-			dataQueue.Enqueue(FThreadInfo(callback, data));
+			DataQueue.Enqueue(FThreadInfo(callback, data));
 		});
 	});
 }

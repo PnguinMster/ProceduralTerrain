@@ -10,9 +10,9 @@ struct FLODInfo_Tri
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, meta = (ClampMin = "1.0", UIMin = "1.0"))
-		int visibleChunks;
+		int VisibleChunks;
 	UPROPERTY(EditAnywhere, meta = (ClampMin = "0.0", ClampMax = "6.0", UIMin = "0.0", UIMax = "6.0"))
-		int lod;
+		int Lod;
 };
 
 UCLASS()
@@ -26,7 +26,7 @@ class PROCEDURALTERRAIN_API UMeshSettings_Tri : public UDataAsset
 
 public:
 	UPROPERTY(EditDefaultsOnly)
-		float meshScale = 10.f;
+		float MeshScale = 10.f;
 	/**
 	0 = 48
 	1 = 72
@@ -39,11 +39,11 @@ public:
 	8 = 240 
 	*/
 	UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "0.0", ClampMax = "8.0", UIMin = "0.0", UIMax = "8.0"))
-		int chunkSizeIndex = 0;
+		int ChunkSizeIndex = 0;
 	UPROPERTY(EditDefaultsOnly)
-		TArray<FLODInfo_Tri> detailLevels;
+		TArray<FLODInfo_Tri> DetailLevels;
 	UPROPERTY(EditDefaultsOnly)
-		UMaterialInterface* materialInterface;
+		UMaterialInterface* MaterialInterface;
 
 	int GetNumberVerticesPerLine();
 	float GetMeshWorldSize();
