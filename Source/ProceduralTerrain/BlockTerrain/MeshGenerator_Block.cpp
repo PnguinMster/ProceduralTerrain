@@ -1,115 +1,26 @@
-#include "BlockMeshGenerator.h"
+#include "MeshGenerator_Block.h"
 
-UMeshData::UMeshData()
+UMeshData_Block* MeshGenerator_Block::GenerateTerrainMesh(TArray<TArray<float>> heightMap, int blockSize, int levelOfDetail)
 {
-	//Reset Arrays
-	Vertices.Reset();
-	Triangles.Reset();
-	Normals.Reset();
-	Tangents.Reset();
-	UVs.Reset();
-	Colors.Reset();
-}
-
-void UMeshData::SetArraysSize(int size)
-{
-	Vertices.SetNum(size);
-	Normals.SetNum(size);
-	UVs.SetNum(size);
-}
-
-void UMeshData::CreateMesh(UProceduralMeshComponent* mesh)
-{
-	mesh->CreateMeshSection_LinearColor(0, Vertices, Triangles, Normals, UVs, Colors, Tangents, true);
-}
-
-void UMeshData::AddBlockVertices(int vertexIndex, float faceScale, FVector2D faceCoord, float heightClamp)
-{
-	/**
-	* Bottom Right
-	* Top Right
-	* Bottom Left
-	* Top Left
-	**/
-	Vertices[vertexIndex] = FVector(-faceScale + faceCoord.X, faceScale + faceCoord.Y, heightClamp);
-	Vertices[vertexIndex + 1] = FVector(faceScale + faceCoord.X, faceScale + faceCoord.Y, heightClamp);
-	Vertices[vertexIndex + 2] = FVector(-faceScale + faceCoord.X, -faceScale + faceCoord.Y, heightClamp);
-	Vertices[vertexIndex + 3] = FVector(faceScale + faceCoord.X, -faceScale + faceCoord.Y, heightClamp);
-}
-
-void UMeshData::AddTriangles(int index)
-{
-	//Triangle 1
-	Triangles.Add(index);
-	Triangles.Add(index + 1);
-	Triangles.Add(index + 2);
-	//Triangle 2
-	Triangles.Add(index + 3);
-	Triangles.Add(index + 2);
-	Triangles.Add(index + 1);
-}
-
-void UMeshData::SetNormals(int vertexIndex)
-{
-	//Calculate Vertex Normal
-	FVector vertexNormal = FVector::CrossProduct(Vertices[vertexIndex + 2] - Vertices[vertexIndex + 1], Vertices[vertexIndex + 2] - Vertices[vertexIndex]).GetSafeNormal();
-	for (int i = 0; i < 4; i++)
-		Normals[vertexIndex + i] = vertexNormal;
-}
-
-void UMeshData::AddUVS(int vertexIndex, int X, int Y, float meshScale)
-{
-	//Set UV to fit whole material
-	FVector2D uvScale = FVector2D((1.f / meshScale), (1.f / meshScale));
-	FVector2D uvPos = FVector2D(X, Y) * uvScale;
-
-	/***
-	* Top Left
-	* Top Right
-	* Bottom Left
-	* Bottom Right
-	*/
-	UVs[vertexIndex] = FVector2D(0.f, 1.f) * uvScale + uvPos;
-	UVs[vertexIndex + 1] = FVector2D(1.f, 1.f) * uvScale + uvPos;
-	UVs[vertexIndex + 2] = FVector2D(0.f, 0.f) * uvScale + uvPos;
-	UVs[vertexIndex + 3] = FVector2D(1.f, 0.f) * uvScale + uvPos;
-}
-
-void UMeshData::AddExistingUVs(int uvIndex)
-{
-	FVector2D DefinedUV;
-	UVs.Add(DefinedUV = UVs[uvIndex]);
-	UVs.Add(DefinedUV = UVs[uvIndex + 1]);
-	UVs.Add(DefinedUV = UVs[uvIndex + 2]);
-	UVs.Add(DefinedUV = UVs[uvIndex + 3]);
-}
-
-UMeshData* BlockMeshGenerator::GenerateTerrainMesh(TArray<TArray<float>> heightMap, int blockSize, int levelOfDetail)
-{
-	//Set Variables
-	UMeshData* meshData = NewObject<UMeshData>();
+	UMeshData_Block* meshData = NewObject<UMeshData_Block>();
 	int borderSize = heightMap.Num();
 	int meshSize = borderSize - 2;
 
-	//LOD Calculation
 	int meshSimplificationIncrement = (levelOfDetail == 0) ? 1 : levelOfDetail * 2;
 	int verticesPerLine = (meshSize - 1) / meshSimplificationIncrement + 1;
 	meshData->SetArraysSize(FMath::Square(verticesPerLine) * 4);
 
-	//Center Mesh
 	float topLeftX = ((meshSize - 1) * -blockSize) + (blockSize * meshSimplificationIncrement);
 	float topLeftY = ((meshSize - 1) * -blockSize) + (blockSize * meshSimplificationIncrement);
 
-	//Face variables
 	float faceSize = blockSize * meshSimplificationIncrement;
 	float spacing = blockSize * 2.f;
 	int vertIndex = 0;
 
-
 	//***********************
-	// 
+	//
 	// Add Initial Vertices
-	// 
+	//
 	// **********************
 	//Add Vertices UVs for top face
 	for (int y = 0; y < meshSize; y += meshSimplificationIncrement) {
@@ -135,9 +46,9 @@ UMeshData* BlockMeshGenerator::GenerateTerrainMesh(TArray<TArray<float>> heightM
 	int vertexCount = meshData->Vertices.Num();
 
 	//******************************
-	// 
+	//
 	//Add Side Vertices and Faces
-	// 
+	//
 	//******************************
 	while (triIndex < vertexCount) {
 		//TOP FACE
@@ -148,9 +59,9 @@ UMeshData* BlockMeshGenerator::GenerateTerrainMesh(TArray<TArray<float>> heightM
 			meshData->Tangents.Add(FProcMeshTangent(0.f, 0.f, 1.f));
 
 		//****************
-		// 
+		//
 		//X SIDE FACES
-		// 
+		//
 		//****************
 		if (triIndex < (verticesPerLine * verticesPerLine * 4) - 4 && meshData->Vertices[triIndex + 3].Z != meshData->Vertices[triIndex + 4].Z
 			&& (triIndex + 4) % (verticesPerLine * 4) != 0) {
@@ -193,7 +104,7 @@ UMeshData* BlockMeshGenerator::GenerateTerrainMesh(TArray<TArray<float>> heightM
 			}
 		}
 		//*************
-		// 
+		//
 		//Y SIDE FACES
 		//
 		//*************
@@ -238,7 +149,6 @@ UMeshData* BlockMeshGenerator::GenerateTerrainMesh(TArray<TArray<float>> heightM
 		triIndex += 4; // Vertex Index Count
 	}
 
-
 	/*************
 	*
 	* Adds Border faces and vertices
@@ -250,9 +160,9 @@ UMeshData* BlockMeshGenerator::GenerateTerrainMesh(TArray<TArray<float>> heightM
 
 	for (int i = 0; i < verticesPerLine; i++) {
 		//************************
-		// 
+		//
 		// X Border
-		// 
+		//
 		//***********************
 		//Get block height for X border
 		int blockClampX = GetBlockHeight(heightMap, blockSize, i + 1, verticesPerLine + 1);
@@ -313,9 +223,9 @@ UMeshData* BlockMeshGenerator::GenerateTerrainMesh(TArray<TArray<float>> heightM
 		}
 
 		//************************
-		// 
+		//
 		// Y Border
-		// 
+		//
 		// ***********************
 		//Get block height for Y border
 		int blockClampY = GetBlockHeight(heightMap, blockSize, verticesPerLine + 1, i + 1);
@@ -381,7 +291,7 @@ UMeshData* BlockMeshGenerator::GenerateTerrainMesh(TArray<TArray<float>> heightM
 	return meshData;
 }
 
-int BlockMeshGenerator::GetBlockHeight(TArray<TArray<float>>& heightMap, int blockSize, int x, int y)
+int MeshGenerator_Block::GetBlockHeight(TArray<TArray<float>>& heightMap, int blockSize, int x, int y)
 {
 	//Clamp to block size
 	int blockClamp = blockSize + (heightMap[x][y] * blockSize);

@@ -21,7 +21,7 @@ public:
 	UProceduralMeshComponent* Mesh;
 
 	bool HasMesh;
-	bool HasRequestedmesh;
+	bool HasRequestedMesh;
 	int Lod;
 
 	ULODMesh_Tri();

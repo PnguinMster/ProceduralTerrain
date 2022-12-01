@@ -1,7 +1,7 @@
 #include "MapThreading_Tri.h"
 #include "Async/Async.h"
 
-FThreadInfo::FThreadInfo(FDataRecieved* callback, UObject* parameter)
+FThreadInfo_Tri::FThreadInfo_Tri(FDataRecieved* callback, UObject* parameter)
 {
 	Callback = callback;
 	Parameter = parameter;
@@ -19,7 +19,7 @@ void UMapThreading_Tri::TickComponent(float deltaTime, ELevelTick tickType, FAct
 	if (DataQueue.IsEmpty())
 		return;
 
-	FThreadInfo threadInfo;
+	FThreadInfo_Tri threadInfo;
 	DataQueue.Dequeue(threadInfo);
 	threadInfo.Callback->Execute(threadInfo.Parameter);
 }
@@ -29,7 +29,7 @@ void UMapThreading_Tri::RequestData(TFunction<UObject* (void)> generateData, FDa
 	AsyncTask(ENamedThreads::AnyHiPriThreadNormalTask, [generateData, callback, this]() {
 		UObject* data = generateData();
 		AsyncTask(ENamedThreads::GameThread, [callback, data, this]() {
-			DataQueue.Enqueue(FThreadInfo(callback, data));
+			DataQueue.Enqueue(FThreadInfo_Tri(callback, data));
 		});
 	});
 }

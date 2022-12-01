@@ -1,17 +1,16 @@
 #pragma once
 
 #include "ProceduralMeshComponent.h"
-#include "BlockMeshSettings.h"
+#include "MeshSettings_Block.h"
 #include "CoreMinimal.h"
-#include "BlockMeshGenerator.generated.h"
+#include "MeshData_Block.generated.h"
 
 UCLASS()
-class UMeshData : public UObject
+class PROCEDURALTERRAIN_API UMeshData_Block : public UObject
 {
 	GENERATED_BODY()
 
 public:
-	//Mesh Info
 	TArray<FVector>Vertices;
 	TArray<int32>Triangles;
 	TArray<FVector>Normals;
@@ -21,8 +20,7 @@ public:
 
 	TArray<FVector>BorderVertices;
 
-	//Constructor
-	UMeshData();
+	UMeshData_Block();
 
 	void SetArraysSize(int size);
 	void CreateMesh(UProceduralMeshComponent* mesh);
@@ -31,12 +29,4 @@ public:
 	void SetNormals(int vertexIndex);
 	void AddUVS(int vertexIndex, int X, int Y, float meshScale);
 	void AddExistingUVs(int uvIndex);
-};
-
-class PROCEDURALTERRAIN_API BlockMeshGenerator
-{
-public:
-	static UMeshData* GenerateTerrainMesh(TArray<TArray<float>> heightMap, int blockSize, int levelOfDetail);
-private:
-	static int GetBlockHeight(TArray<TArray<float>>& heightMap, int blockSize, int x, int y);
 };

@@ -25,7 +25,7 @@ public:
 protected:
 	UMapThreading_Tri* MapThread;
 	UProceduralMeshComponent* MeshObject;
-	UHeightMap_Tri* MapData;
+	UHeightMap_Tri* HeightMap;
 	UHeightMapSettings_Tri* HeightMapSettings;
 	UMeshSettings_Tri* MeshSettings;
 

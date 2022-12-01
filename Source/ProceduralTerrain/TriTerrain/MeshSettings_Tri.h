@@ -9,9 +9,9 @@ struct FLODInfo_Tri
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, meta = (ClampMin = "1.0", UIMin = "1.0"))
+	UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "1.0", UIMin = "1.0"))
 		int VisibleChunks;
-	UPROPERTY(EditAnywhere, meta = (ClampMin = "0.0", ClampMax = "6.0", UIMin = "0.0", UIMax = "6.0"))
+	UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "0.0", ClampMax = "6.0", UIMin = "0.0", UIMax = "6.0"))
 		int Lod;
 };
 

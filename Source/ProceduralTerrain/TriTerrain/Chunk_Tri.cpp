@@ -26,8 +26,8 @@ void AChunk_Tri::Initialize(UMapThreading_Tri* mapThread, UMeshSettings_Tri* mes
 	SetLODMeshes(meshSettings->DetailLevels);
 	SetVisible(false);
 
-	MeshObject->SetMaterial(0, TextureGenerator_Tri::CreateMaterialInstance(meshSettings, heightMapSettings, this));
 	MeshObject->SetWorldLocation(FVector(chunkPosition.X, chunkPosition.Y, 0));
+	MeshObject->SetMaterial(0, TextureGenerator_Tri::CreateMaterialInstance(meshSettings, heightMapSettings, this));
 
 	TFunction<UObject* (void)> function = [=]() {return HeightMapGenerator_Tri::GenerateHeightMap(meshSettings->GetNumberVerticesPerLine(), meshSettings->GetNumberVerticesPerLine(), heightMapSettings, SampleCenter); };
 	mapThread->RequestData(function, &DataRecievedDelegate);
@@ -38,9 +38,9 @@ void AChunk_Tri::UpdateChunk()
 	if (!HeightMapRecieved)
 		return;
 
+	float maxViewDist = MeshSettings->DetailLevels[MeshSettings->DetailLevels.Num() - 1].VisibleChunks * MeshSettings->GetMeshWorldSize();
 	float viewerDistFromNearestChunk = FVector2D::Distance(FVector2D(GetActorLocation().X, GetActorLocation().Y), *ViewerPosition);
-	bool shouldBeVisible = viewerDistFromNearestChunk <= MeshSettings->DetailLevels[MeshSettings->DetailLevels.Num() - 1].VisibleChunks * MeshSettings->GetMeshWorldSize();
-
+	bool shouldBeVisible = viewerDistFromNearestChunk <= maxViewDist;
 	MakeMeshVisible(viewerDistFromNearestChunk, shouldBeVisible);
 
 	if (IsVisible() != shouldBeVisible) {
@@ -55,7 +55,7 @@ void AChunk_Tri::UpdateChunk()
 
 void AChunk_Tri::OnHeightMapRecieved(UObject* heightMapObject)
 {
-	MapData = Cast<UHeightMap_Tri>(heightMapObject);
+	HeightMap = Cast<UHeightMap_Tri>(heightMapObject);
 	HeightMapRecieved = true;
 
 	UpdateChunk();
@@ -80,8 +80,8 @@ void AChunk_Tri::MakeMeshVisible(float viewerDistFromNearestChunk, bool shouldBe
 			PreviousLODIndex = lodIndex;
 			MeshObject->SetProcMeshSection(0, *lodMesh->Mesh->GetProcMeshSection(0));
 		}
-		else if (!lodMesh->HasRequestedmesh)
-			lodMesh->RequestMesh(MapData, MeshSettings, MapThread);
+		else if (!lodMesh->HasRequestedMesh)
+			lodMesh->RequestMesh(HeightMap, MeshSettings, MapThread);
 	}
 }
 

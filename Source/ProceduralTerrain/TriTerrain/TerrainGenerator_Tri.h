@@ -23,6 +23,7 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+	virtual void Tick(float deltaTime) override;
 
 	void UpdateVisibleChunk();
 	void CreateChunk(FVector2D& viewedChunkCoord);
@@ -38,6 +39,4 @@ protected:
 
 	FVector2D ViewerPosition;
 	FVector2D ViewerPositionOld;
-public:
-	virtual void Tick(float deltaTime) override;
 };

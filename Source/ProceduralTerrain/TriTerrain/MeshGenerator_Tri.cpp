@@ -1,4 +1,5 @@
 #include "MeshGenerator_Tri.h"
+#include "NoiseMap_Tri.h"
 
 UMeshData_Tri* MeshGenerator_Tri::GenerateTerrainMesh(TArray<TArray<float>>& heightMap, UMeshSettings_Tri* meshSettings, int levelOfDetail)
 {
@@ -20,9 +21,7 @@ UMeshData_Tri* MeshGenerator_Tri::GenerateTerrainMesh(TArray<TArray<float>>& hei
 
 void MeshGenerator_Tri::SetVertexIndexMap(TArray<TArray<int>>& vertexIndexMap, int verticesPerLine, int skipIncrement, int& outOfMeshVertexIndex, int& meshVertexIndex)
 {
-	vertexIndexMap.SetNum(verticesPerLine);
-	for (int i = 0; i < verticesPerLine; i++)
-		vertexIndexMap[i].SetNum(verticesPerLine);
+	NoiseMap_Tri::Set2DArrayNum(vertexIndexMap, verticesPerLine, verticesPerLine);
 
 	for (int y = 0; y < verticesPerLine; y++) {
 		for (int x = 0; x < verticesPerLine; x++) {

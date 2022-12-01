@@ -1,25 +1,26 @@
-#include "BlockNoiseMap.h"
+#include "NoiseMap_Block.h"
+#include "Kismet/KismetMathLibrary.h"
 
-TArray<TArray<float>> BlockNoiseMap::GenerateNoiseMap(int mapWidth, int mapHeight, FNoiseSettings settings, FVector2D sampleCenter)
+TArray<TArray<float>> NoiseMap_Block::GenerateNoiseMap(int mapWidth, int mapHeight, FNoiseSettings_Block settings, FVector2D sampleCenter)
 {
 	//Variables
 	TArray<TArray<float>> noiseMap;
-	FRandomStream* prng = new FRandomStream(settings.seed);
+	FRandomStream* prng = new FRandomStream(settings.Seed);
 	TArray<FVector2D> ocataveOffsets;
 
 	float maxPossibleHeight = 0;
 	float amplitude = 1.f;
 	float frequency = 1.f;
 
-	ocataveOffsets.SetNum(settings.octaves);
+	ocataveOffsets.SetNum(settings.Octaves);
 	//Offset Octave
-	for (int i = 0; i < settings.octaves; i++) {
-		float offsetX = prng->FRandRange(-100000, 100000) + settings.offset.X + sampleCenter.X;
-		float offsetY = prng->FRandRange(-100000, 100000) + settings.offset.Y + sampleCenter.Y;
+	for (int i = 0; i < settings.Octaves; i++) {
+		float offsetX = prng->FRandRange(-100000, 100000) + settings.Offset.X + sampleCenter.X;
+		float offsetY = prng->FRandRange(-100000, 100000) + settings.Offset.Y + sampleCenter.Y;
 		ocataveOffsets[i].Set(offsetX, offsetY);
 
 		maxPossibleHeight += amplitude;
-		amplitude *= settings.persistance;
+		amplitude *= settings.Persistance;
 	}
 
 	//Create 2D Array
@@ -41,15 +42,15 @@ TArray<TArray<float>> BlockNoiseMap::GenerateNoiseMap(int mapWidth, int mapHeigh
 			float noiseHeight = 0.f;
 
 			//Change Detail Octave
-			for (int i = 0; i < settings.octaves; i++) {
+			for (int i = 0; i < settings.Octaves; i++) {
 				FVector2D sample = FVector2D(
-					(x - halfWidth + ocataveOffsets[i].X) / settings.scale * frequency,
-					(y - halfHeight + ocataveOffsets[i].Y) / settings.scale * frequency);
+					(x - halfWidth + ocataveOffsets[i].X) / settings.Scale * frequency,
+					(y - halfHeight + ocataveOffsets[i].Y) / settings.Scale * frequency);
 
 				float perlinValue = FMath::PerlinNoise2D(sample) * 2.f - 1.f;
 				noiseHeight += perlinValue * amplitude;
-				amplitude *= settings.persistance;
-				frequency *= settings.lacunarity;
+				amplitude *= settings.Persistance;
+				frequency *= settings.Lacunarity;
 			}
 
 			//Set Max Min Noise Height
