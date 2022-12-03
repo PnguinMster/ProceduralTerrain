@@ -44,7 +44,7 @@ UTexture2D* TextureGenerator_Block::TextureFromHeightMap(TArray<TArray<float>> h
 
 UMaterialInstanceDynamic* TextureGenerator_Block::CreateMaterialInstance(UHeightMap_Block* heightMap, UMeshSettings_Block* meshSettings, UObject* inOuter)
 {
-	UTexture2D* texture = TextureGenerator_Block::TextureFromColorMap(heightMap->Color, meshSettings->ChunkSize, meshSettings->ChunkSize);
+	UTexture2D* texture = TextureGenerator_Block::TextureFromColorMap(heightMap->Color, meshSettings->GetChunkSize(), meshSettings->GetChunkSize());
 	UMaterialInstanceDynamic* dynamicMaterialInstance = UMaterialInstanceDynamic::Create(meshSettings->MaterialInterface, inOuter);
 	dynamicMaterialInstance->SetTextureParameterValue("ChunkTexture", texture);
 	return dynamicMaterialInstance;

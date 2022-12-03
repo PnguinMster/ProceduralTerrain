@@ -97,5 +97,5 @@ FVector AChunk_Block::ChunkPosition()
 
 FVector2D AChunk_Block::SampleCenter()
 {
-	return Coord * MeshSettings->ChunkSize;
+	return Coord * MeshSettings->GetChunkSize();
 }
