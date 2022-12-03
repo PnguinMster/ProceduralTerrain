@@ -28,6 +28,8 @@ public:
 
 protected:
 	TQueue<FThreadInfo_Block> DataQueue;
+	bool IsInitialChunks;
 
 	virtual void TickComponent(float deltaTime, ELevelTick tickType, FActorComponentTickFunction* thisTickFunction) override;
+	void IterateQueue();
 };

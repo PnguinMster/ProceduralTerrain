@@ -28,7 +28,7 @@ protected:
 	void UpdateVisibleChunk();
 	void CreateChunk(FVector2D& viewedChunkCoord);
 
-	const float MoveThresholdForChunkUpdate = 300.f;
+	const float MoveThresholdForChunkUpdate = 150.f;
 	int ChunksVisibleInView;
 
 	TMap<FVector2D, AChunk_Tri*> ChunkMap;

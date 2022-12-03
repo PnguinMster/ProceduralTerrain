@@ -16,9 +16,16 @@ void UMapThreading_Tri::TickComponent(float deltaTime, ELevelTick tickType, FAct
 {
 	Super::TickComponent(deltaTime, tickType, thisTickFunction);
 
-	if (DataQueue.IsEmpty())
-		return;
+	if (IsInitialChunks) {
+		while (!DataQueue.IsEmpty()) IterateQueue();
+		IsInitialChunks = false;
+	}
 
+	if (!DataQueue.IsEmpty()) IterateQueue();
+}
+
+void UMapThreading_Tri::IterateQueue()
+{
 	FThreadInfo_Tri threadInfo;
 	DataQueue.Dequeue(threadInfo);
 	threadInfo.Callback->Execute(threadInfo.Parameter);
@@ -26,7 +33,7 @@ void UMapThreading_Tri::TickComponent(float deltaTime, ELevelTick tickType, FAct
 
 void UMapThreading_Tri::RequestData(TFunction<UObject* (void)> generateData, FDataRecieved* callback)
 {
-	AsyncTask(ENamedThreads::AnyHiPriThreadNormalTask, [generateData, callback, this]() {
+	AsyncTask(ENamedThreads::AnyHiPriThreadHiPriTask, [generateData, callback, this]() {
 		UObject* data = generateData();
 		AsyncTask(ENamedThreads::GameThread, [callback, data, this]() {
 			DataQueue.Enqueue(FThreadInfo_Tri(callback, data));
