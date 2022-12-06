@@ -4,11 +4,11 @@
 ULODMesh_Tri::ULODMesh_Tri()
 {
 	Mesh = CreateDefaultSubobject<UProceduralMeshComponent>(TEXT("Mesh"));
-	MeshDataRecieved.BindUObject(this, &ULODMesh_Tri::OnMeshDataRecieved);
 }
 
 void ULODMesh_Tri::Initialize(int lod, FVoidDelegate* updateCallback)
 {
+	MeshDataRecieved.BindUObject(this, &ULODMesh_Tri::OnMeshDataRecieved);
 	Lod = lod;
 	UpdateCallback = updateCallback;
 }

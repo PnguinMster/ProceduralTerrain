@@ -7,6 +7,8 @@ FThreadInfo_Tri::FThreadInfo_Tri(FDataRecieved* callback, UObject* parameter)
 	Parameter = parameter;
 }
 
+int UMapThreading_Tri::ChunkIterationPerTick = 3;
+
 UMapThreading_Tri::UMapThreading_Tri()
 {
 	PrimaryComponentTick.bCanEverTick = true;
@@ -16,12 +18,13 @@ void UMapThreading_Tri::TickComponent(float deltaTime, ELevelTick tickType, FAct
 {
 	Super::TickComponent(deltaTime, tickType, thisTickFunction);
 
-	if (IsInitialChunks) {
-		while (!DataQueue.IsEmpty()) IterateQueue();
-		IsInitialChunks = false;
+	int iterator = 0;
+	while (!DataQueue.IsEmpty()) {
+		if (iterator >= ChunkIterationPerTick)
+			return;
+		IterateQueue();
+		iterator++;
 	}
-
-	if (!DataQueue.IsEmpty()) IterateQueue();
 }
 
 void UMapThreading_Tri::IterateQueue()

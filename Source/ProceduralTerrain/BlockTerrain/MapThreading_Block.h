@@ -11,7 +11,7 @@ struct FThreadInfo_Block
 {
 	GENERATED_BODY()
 
-		FDataRecieved* Callback = nullptr;
+	FDataRecieved* Callback = nullptr;
 	UObject* Parameter = nullptr;
 
 	FThreadInfo_Block() {};
@@ -28,7 +28,6 @@ public:
 
 protected:
 	TQueue<FThreadInfo_Block> DataQueue;
-	bool IsInitialChunks;
 
 	virtual void TickComponent(float deltaTime, ELevelTick tickType, FActorComponentTickFunction* thisTickFunction) override;
 	void IterateQueue();

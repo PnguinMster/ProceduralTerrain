@@ -5,11 +5,11 @@
 AChunk_Block::AChunk_Block() {
 	MeshObject = CreateDefaultSubobject<UProceduralMeshComponent>(TEXT("Mesh"));
 	RootComponent = MeshObject;
-	UpdateChunkDelegate.BindUObject(this, &AChunk_Block::UpdateChunk);
 }
 
 void AChunk_Block::Initialize(UMapThreading_Block* mapThread, UMeshSettings_Block* meshSettings, UHeightMapSettings_Block* heightMapSettings, TArray<AChunk_Block*>* visibleTerrainChunks, FVector2D coord, FVector2D& viewerPosition)
 {
+	UpdateChunkDelegate.BindUObject(this, &AChunk_Block::UpdateChunk);
 	DataRecievedDelegate.BindUObject(this, &AChunk_Block::OnHeightMapRecieved);
 
 	MapThread = mapThread;

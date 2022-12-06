@@ -4,11 +4,11 @@
 ULODMesh_Block::ULODMesh_Block()
 {
 	Mesh = CreateDefaultSubobject<UProceduralMeshComponent>(TEXT("Mesh"));
-	OnMeshData.BindUObject(this, &ULODMesh_Block::OnMeshDataReceived);
 }
 
 void ULODMesh_Block::Initialize(int lod, FVoidDelegate* updateCallback)
 {
+	OnMeshData.BindUObject(this, &ULODMesh_Block::OnMeshDataReceived);
 	Lod = lod;
 	UpdateCallback = updateCallback;
 }

@@ -28,7 +28,7 @@ public:
 
 protected:
 	TQueue<FThreadInfo_Tri> DataQueue;
-	bool IsInitialChunks = true;
+	static int ChunkIterationPerTick;
 
 	virtual void TickComponent(float deltaTime, ELevelTick tickType, FActorComponentTickFunction* thisTickFunction) override;
 	void IterateQueue();

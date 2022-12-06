@@ -16,11 +16,6 @@ void UMapThreading_Block::TickComponent(float deltaTime, ELevelTick tickType, FA
 {
 	Super::TickComponent(deltaTime, tickType, thisTickFunction);
 
-	if (IsInitialChunks) {
-		while (!DataQueue.IsEmpty()) IterateQueue();
-		IsInitialChunks = false;
-	}
-
 	if (!DataQueue.IsEmpty()) IterateQueue();
 }
 

@@ -6,11 +6,11 @@ AChunk_Tri::AChunk_Tri()
 {
 	MeshObject = CreateDefaultSubobject<UProceduralMeshComponent>(TEXT("Mesh"));
 	RootComponent = MeshObject;
-	UpdateChunkDelegate.BindUObject(this, &AChunk_Tri::UpdateChunk);
 }
 
 void AChunk_Tri::Initialize(UMapThreading_Tri* mapThread, UMeshSettings_Tri* meshSettings, UHeightMapSettings_Tri* heightMapSettings, TArray<AChunk_Tri*>* visibleTerrainChunks, FVector2D coord, FVector2D& viewerPosition)
 {
+	UpdateChunkDelegate.BindUObject(this, &AChunk_Tri::UpdateChunk);
 	DataRecievedDelegate.BindUObject(this, &AChunk_Tri::OnHeightMapRecieved);
 
 	MapThread = mapThread;
