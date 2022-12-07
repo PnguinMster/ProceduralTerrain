@@ -21,9 +21,7 @@ class PROCEDURALTERRAIN_API UMeshSettings_Block : public UDataAsset
 {
 	GENERATED_BODY()
 
-	UMeshSettings_Block();
-
-	static TArray<int> SupportedChunkSizes;
+		static const int SupportedChunkSizes[9];
 
 public:
 	UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "1.0", UIMin = "1.0"))
