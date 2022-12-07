@@ -66,7 +66,6 @@ void ATerrainGenerator_Block::CreateChunk(FVector2D& viewedChunkCoord)
 	chunk->Initialize(MapThread, MeshSettings, HeightMapSettings, &VisibleChunks, viewedChunkCoord, ViewerPosition);
 
 	ChunkMap.Add(viewedChunkCoord, chunk);
-
-	chunk->FinishSpawning(SpawnLocAndRotation);
+	chunk->FinishSpawning(SpawnLocAndRotation, false);
 	chunk->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
 }

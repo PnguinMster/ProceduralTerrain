@@ -72,6 +72,7 @@ void AChunk_Block::MakeMeshVisible(float viewerDistFromNearestChunk, bool should
 	}
 	if (lodIndex != PreviousLODIndex) {
 		ULODMesh_Block* lodMesh = LodMeshes[lodIndex];
+		lodMesh->Mesh->UpdateBounds();
 		if (lodMesh->HasMesh) {
 			PreviousLODIndex = lodIndex;
 			MeshObject->SetProcMeshSection(0, *lodMesh->Mesh->GetProcMeshSection(0));
