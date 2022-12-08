@@ -67,39 +67,37 @@ void MeshGenerator_Block::CreateFace(UMeshData_Block* meshData, EFaceSide side, 
 
 int MeshGenerator_Block::GetBottomHeight(EFaceSide side, TArray<TArray<float>>& heightMap, int blockSize, int meshSimpleIncrement, int x, int y)
 {
-	int heightOffset = blockSize * meshSimpleIncrement;
-	int height = 0;
-	int edgeHeight = 0;
-	bool isEdgeOfMap = false;
+	int heightOffset = (blockSize * 2) * meshSimpleIncrement;
 
 	switch (side)
 	{
 	case EFaceSide::EAST:
-		isEdgeOfMap = x + 1 + meshSimpleIncrement > heightMap.Num() - 1;
-		height = GetBlockHeight(heightMap, blockSize, x + 1 + meshSimpleIncrement, y + 1);
-		edgeHeight = GetBlockHeight(heightMap, blockSize, x + 1, y + 2) - heightOffset;
+		return x + 1 + meshSimpleIncrement > heightMap.Num() - 1 ?
+			GetBlockHeight(heightMap, blockSize, x + 1, y + 2) - heightOffset :
+			GetBlockHeight(heightMap, blockSize, x + 1 + meshSimpleIncrement, y + 1);
 		break;
 
 	case EFaceSide::WEST:
-		isEdgeOfMap = x < meshSimpleIncrement;
-		height = GetBlockHeight(heightMap, blockSize, x + 1 - meshSimpleIncrement, y + 1);
-		edgeHeight = GetBlockHeight(heightMap, blockSize, x, y + 1) - heightOffset;
+		return x < meshSimpleIncrement ?
+			GetBlockHeight(heightMap, blockSize, x, y + 1) - heightOffset :
+			GetBlockHeight(heightMap, blockSize, x + 1 - meshSimpleIncrement, y + 1);
 		break;
 
 	case EFaceSide::NORTH:
-		isEdgeOfMap = y + 1 + meshSimpleIncrement > heightMap.Num() - 1;
-		height = GetBlockHeight(heightMap, blockSize, x + 1, y + 1 + meshSimpleIncrement);
-		edgeHeight = GetBlockHeight(heightMap, blockSize, x + 1, y + 2) - heightOffset;
+		return y + 1 + meshSimpleIncrement > heightMap.Num() - 1 ?
+			GetBlockHeight(heightMap, blockSize, x + 1, y + 2) - heightOffset :
+			GetBlockHeight(heightMap, blockSize, x + 1, y + 1 + meshSimpleIncrement);
 		break;
 
 	case EFaceSide::SOUTH:
-		isEdgeOfMap = y < meshSimpleIncrement;
-		height = GetBlockHeight(heightMap, blockSize, x + 1, y + 1 - meshSimpleIncrement);
-		edgeHeight = GetBlockHeight(heightMap, blockSize, x + 1, y) - heightOffset;
+		return y < meshSimpleIncrement ?
+			GetBlockHeight(heightMap, blockSize, x + 1, y) - heightOffset :
+			GetBlockHeight(heightMap, blockSize, x + 1, y + 1 - meshSimpleIncrement);
+		break;
+	default:
+		return 0;
 		break;
 	}
-
-	return isEdgeOfMap ? edgeHeight : height;
 }
 
 int MeshGenerator_Block::GetBlockHeight(TArray<TArray<float>>& heightMap, int blockSize, int x, int y)
