@@ -24,35 +24,42 @@ void UMeshData_Block::CreateMesh(UProceduralMeshComponent* mesh)
 
 void UMeshData_Block::AddVertices(EFaceSide faceSide, float faceScale, FVector2D faceCoord, float topHeight, float bottomHeight)
 {
-	if (faceSide == EFaceSide::TOP) {
+	switch (faceSide)
+	{
+	case EFaceSide::TOP:
 		Vertices[vertIndex] = FVector(-faceScale + faceCoord.X, faceScale + faceCoord.Y, topHeight);
 		Vertices[vertIndex + 1] = FVector(faceScale + faceCoord.X, faceScale + faceCoord.Y, topHeight);
 		Vertices[vertIndex + 2] = FVector(-faceScale + faceCoord.X, -faceScale + faceCoord.Y, topHeight);
 		Vertices[vertIndex + 3] = FVector(faceScale + faceCoord.X, -faceScale + faceCoord.Y, topHeight);
-	}
-	else if (faceSide == EFaceSide::EAST) {
-		Vertices[vertIndex] = FVector(faceScale + faceCoord.X, faceScale + faceCoord.Y, topHeight);
-		Vertices[vertIndex + 1] = FVector(faceScale + faceCoord.X, faceScale + faceCoord.Y, bottomHeight);
-		Vertices[vertIndex + 2] = FVector(faceScale + faceCoord.X, -faceScale + faceCoord.Y, topHeight);
-		Vertices[vertIndex + 3] = FVector(faceScale + faceCoord.X, -faceScale + faceCoord.Y, bottomHeight);
-	}
-	else if (faceSide == EFaceSide::WEST) {
-		Vertices[vertIndex] = FVector(-faceScale + faceCoord.X, -faceScale + faceCoord.Y, topHeight);
-		Vertices[vertIndex + 1] = FVector(-faceScale + faceCoord.X, -faceScale + faceCoord.Y, bottomHeight);
-		Vertices[vertIndex + 2] = FVector(-faceScale + faceCoord.X, faceScale + faceCoord.Y, topHeight);
-		Vertices[vertIndex + 3] = FVector(-faceScale + faceCoord.X, faceScale + faceCoord.Y, bottomHeight);
-	}
-	else if (faceSide == EFaceSide::NORTH) {
+		break;
+
+	case EFaceSide::NORTH:
 		Vertices[vertIndex] = FVector(-faceScale + faceCoord.X, faceScale + faceCoord.Y, topHeight);
 		Vertices[vertIndex + 1] = FVector(-faceScale + faceCoord.X, faceScale + faceCoord.Y, bottomHeight);
 		Vertices[vertIndex + 2] = FVector(faceScale + faceCoord.X, faceScale + faceCoord.Y, topHeight);
 		Vertices[vertIndex + 3] = FVector(faceScale + faceCoord.X, faceScale + faceCoord.Y, bottomHeight);
-	}
-	else if (faceSide == EFaceSide::SOUTH) {
+		break;
+
+	case EFaceSide::SOUTH:
 		Vertices[vertIndex] = FVector(faceScale + faceCoord.X, -faceScale + faceCoord.Y, topHeight);
 		Vertices[vertIndex + 1] = FVector(faceScale + faceCoord.X, -faceScale + faceCoord.Y, bottomHeight);
 		Vertices[vertIndex + 2] = FVector(-faceScale + faceCoord.X, -faceScale + faceCoord.Y, topHeight);
 		Vertices[vertIndex + 3] = FVector(-faceScale + faceCoord.X, -faceScale + faceCoord.Y, bottomHeight);
+		break;
+
+	case EFaceSide::WEST:
+		Vertices[vertIndex] = FVector(-faceScale + faceCoord.X, -faceScale + faceCoord.Y, topHeight);
+		Vertices[vertIndex + 1] = FVector(-faceScale + faceCoord.X, -faceScale + faceCoord.Y, bottomHeight);
+		Vertices[vertIndex + 2] = FVector(-faceScale + faceCoord.X, faceScale + faceCoord.Y, topHeight);
+		Vertices[vertIndex + 3] = FVector(-faceScale + faceCoord.X, faceScale + faceCoord.Y, bottomHeight);
+		break;
+
+	case EFaceSide::EAST:
+		Vertices[vertIndex] = FVector(faceScale + faceCoord.X, faceScale + faceCoord.Y, topHeight);
+		Vertices[vertIndex + 1] = FVector(faceScale + faceCoord.X, faceScale + faceCoord.Y, bottomHeight);
+		Vertices[vertIndex + 2] = FVector(faceScale + faceCoord.X, -faceScale + faceCoord.Y, topHeight);
+		Vertices[vertIndex + 3] = FVector(faceScale + faceCoord.X, -faceScale + faceCoord.Y, bottomHeight);
+		break;
 	}
 
 	AddNormals();

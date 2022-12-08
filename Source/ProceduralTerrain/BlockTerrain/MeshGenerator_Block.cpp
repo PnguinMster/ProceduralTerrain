@@ -5,49 +5,101 @@ UMeshData_Block* MeshGenerator_Block::GenerateTerrainMesh(TArray<TArray<float>> 
 	UMeshData_Block* meshData = NewObject<UMeshData_Block>();
 	int meshSize = heightMap.Num() - 2;
 	int meshSimplificationIncrement = (levelOfDetail == 0) ? 1 : levelOfDetail * 2;
-	int verticesPerLine = (meshSize - 1) / meshSimplificationIncrement + 1;
 
-	float topLeft = ((meshSize - 1) * -blockSize) + (blockSize * meshSimplificationIncrement);
-	float faceSize = blockSize * meshSimplificationIncrement;
-	float spacing = blockSize * 2.f;
-
-	meshData->SetArraysSize(MeshFaceCount(heightMap, blockSize, verticesPerLine, meshSize,meshSimplificationIncrement));
-	//meshData->SetArraysSize(verticesPerLine * verticesPerLine);
+	meshData->SetArraysSize(MeshFaceCount(heightMap, blockSize, meshSimplificationIncrement));
 
 	for (int y = 0; y < meshSize; y += meshSimplificationIncrement) {
 		for (int x = 0; x < meshSize; x += meshSimplificationIncrement) {
-			FVector2D facePosition = FVector2D(spacing * x + topLeft, spacing * y + topLeft);
-			int topHeight = GetBlockHeight(heightMap, blockSize, x + 1, y + 1);
-
-			meshData->AddUVS(x, y, verticesPerLine);
-			meshData->AddVertices(EFaceSide::TOP, faceSize, facePosition, topHeight);
-			
-			int bottomHeight = x + 1 + meshSimplificationIncrement > heightMap.Num() - 1 ? GetBlockHeight(heightMap, blockSize, x + 1, y + 2) - (blockSize * meshSimplificationIncrement) : GetBlockHeight(heightMap, blockSize, x + 1 + meshSimplificationIncrement, y + 1);
-			if (topHeight > bottomHeight) {
-				meshData->AddUVS(x, y, verticesPerLine);
-				meshData->AddVertices(EFaceSide::EAST, faceSize, facePosition, topHeight, bottomHeight);
-			}
-
-			bottomHeight = x < meshSimplificationIncrement ? GetBlockHeight(heightMap, blockSize, x, y + 1) - (blockSize * meshSimplificationIncrement) : GetBlockHeight(heightMap, blockSize, x + 1 - meshSimplificationIncrement, y + 1);
-			if (topHeight > bottomHeight) {
-				meshData->AddUVS(x, y, verticesPerLine);
-				meshData->AddVertices(EFaceSide::WEST, faceSize, facePosition, topHeight, bottomHeight);
-			}
-
-			bottomHeight = y + 1 + meshSimplificationIncrement > heightMap.Num() - 1 ? GetBlockHeight(heightMap, blockSize, x + 1, y + 2) - (blockSize * meshSimplificationIncrement) : GetBlockHeight(heightMap, blockSize, x + 1, y + 1 + meshSimplificationIncrement);
-			if (topHeight > bottomHeight) {
-				meshData->AddUVS(x, y, verticesPerLine);
-				meshData->AddVertices(EFaceSide::NORTH, faceSize, facePosition, topHeight, bottomHeight);
-			}
-
-			bottomHeight = y < meshSimplificationIncrement ? GetBlockHeight(heightMap, blockSize, x + 1, y) - (blockSize * meshSimplificationIncrement) : bottomHeight = GetBlockHeight(heightMap, blockSize, x + 1, y + 1 - meshSimplificationIncrement);
-			if (topHeight > bottomHeight) {
-				meshData->AddUVS(x, y, verticesPerLine);
-				meshData->AddVertices(EFaceSide::SOUTH, faceSize, facePosition, topHeight, bottomHeight);
-			}
+			CreateFace(meshData, EFaceSide::TOP, heightMap, blockSize, meshSimplificationIncrement, x, y);
+			CreateFace(meshData, EFaceSide::NORTH, heightMap, blockSize, meshSimplificationIncrement, x, y);
+			CreateFace(meshData, EFaceSide::EAST, heightMap, blockSize, meshSimplificationIncrement, x, y);
+			CreateFace(meshData, EFaceSide::WEST, heightMap, blockSize, meshSimplificationIncrement, x, y);
+			CreateFace(meshData, EFaceSide::SOUTH, heightMap, blockSize, meshSimplificationIncrement, x, y);
 		}
 	}
 	return meshData;
+}
+
+int MeshGenerator_Block::MeshFaceCount(TArray<TArray<float>>& heightMap, int blockSize, int meshSimpleIncrement)
+{
+	int faceCount = 0;
+	int meshSize = heightMap.Num() - 2;
+	int verticesPerLine = (meshSize - 1) / meshSimpleIncrement + 1;
+
+	for (int y = 0; y < meshSize; y += meshSimpleIncrement) {
+		for (int x = 0; x < meshSize; x += meshSimpleIncrement) {
+			int topHeight = GetBlockHeight(heightMap, blockSize, x + 1, y + 1);
+
+			if (topHeight > GetBottomHeight(EFaceSide::EAST, heightMap, blockSize, meshSimpleIncrement, x, y)) faceCount++;
+			if (topHeight > GetBottomHeight(EFaceSide::WEST, heightMap, blockSize, meshSimpleIncrement, x, y)) faceCount++;
+			if (topHeight > GetBottomHeight(EFaceSide::NORTH, heightMap, blockSize, meshSimpleIncrement, x, y)) faceCount++;
+			if (topHeight > GetBottomHeight(EFaceSide::SOUTH, heightMap, blockSize, meshSimpleIncrement, x, y)) faceCount++;
+		}
+	}
+
+	faceCount += FMath::Square(verticesPerLine);
+
+	return faceCount;
+}
+
+void MeshGenerator_Block::CreateFace(UMeshData_Block* meshData, EFaceSide side, TArray<TArray<float>>& heightMap, int blockSize, int meshSimpleIncrement, int x, int y)
+{
+	int meshSize = heightMap.Num() - 2;
+	int verticesPerLine = (meshSize - 1) / meshSimpleIncrement + 1;
+	int topHeight = GetBlockHeight(heightMap, blockSize, x + 1, y + 1);
+	int bottomHeight = GetBottomHeight(side, heightMap, blockSize, meshSimpleIncrement, x, y);
+
+	float topLeft = ((meshSize - 1) * -blockSize) + (blockSize * meshSimpleIncrement);
+	float faceSize = blockSize * meshSimpleIncrement;
+	float spacing = blockSize * 2.f;
+
+	FVector2D facePosition = FVector2D(spacing * x + topLeft, spacing * y + topLeft);
+
+	if (side == EFaceSide::TOP) {
+		meshData->AddUVS(x, y, verticesPerLine);
+		meshData->AddVertices(side, faceSize, facePosition, topHeight);
+	}
+	else if (topHeight > bottomHeight) {
+		meshData->AddUVS(x, y, verticesPerLine);
+		meshData->AddVertices(side, faceSize, facePosition, topHeight, bottomHeight);
+	}
+}
+
+int MeshGenerator_Block::GetBottomHeight(EFaceSide side, TArray<TArray<float>>& heightMap, int blockSize, int meshSimpleIncrement, int x, int y)
+{
+	int heightOffset = blockSize * meshSimpleIncrement;
+	int height = 0;
+	int edgeHeight = 0;
+	bool isEdgeOfMap = false;
+
+	switch (side)
+	{
+	case EFaceSide::EAST:
+		isEdgeOfMap = x + 1 + meshSimpleIncrement > heightMap.Num() - 1;
+		height = GetBlockHeight(heightMap, blockSize, x + 1 + meshSimpleIncrement, y + 1);
+		edgeHeight = GetBlockHeight(heightMap, blockSize, x + 1, y + 2) - heightOffset;
+		break;
+
+	case EFaceSide::WEST:
+		isEdgeOfMap = x < meshSimpleIncrement;
+		height = GetBlockHeight(heightMap, blockSize, x + 1 - meshSimpleIncrement, y + 1);
+		edgeHeight = GetBlockHeight(heightMap, blockSize, x, y + 1) - heightOffset;
+		break;
+
+	case EFaceSide::NORTH:
+		isEdgeOfMap = y + 1 + meshSimpleIncrement > heightMap.Num() - 1;
+		height = GetBlockHeight(heightMap, blockSize, x + 1, y + 1 + meshSimpleIncrement);
+		edgeHeight = GetBlockHeight(heightMap, blockSize, x + 1, y + 2) - heightOffset;
+		break;
+
+	case EFaceSide::SOUTH:
+		isEdgeOfMap = y < meshSimpleIncrement;
+		height = GetBlockHeight(heightMap, blockSize, x + 1, y + 1 - meshSimpleIncrement);
+		edgeHeight = GetBlockHeight(heightMap, blockSize, x + 1, y) - heightOffset;
+		break;
+	}
+
+	return isEdgeOfMap ? edgeHeight : height;
 }
 
 int MeshGenerator_Block::GetBlockHeight(TArray<TArray<float>>& heightMap, int blockSize, int x, int y)
@@ -56,36 +108,4 @@ int MeshGenerator_Block::GetBlockHeight(TArray<TArray<float>>& heightMap, int bl
 	blockClamp -= (blockClamp % (blockSize * 2));
 
 	return blockClamp;
-}
-
-int MeshGenerator_Block::MeshFaceCount(TArray<TArray<float>>& heightMap, int blockSize, int verticesPerLine, int meshSize, int meshSimpleIncrement)
-{
-	int faceCount = 0;
-	for (int y = 0; y < meshSize; y+= meshSimpleIncrement) {
-		for (int x = 0; x < meshSize; x += meshSimpleIncrement) {
-			int topHeight = GetBlockHeight(heightMap, blockSize, x + 1, y + 1);
-
-			int bottomHeight = x + 1 + meshSimpleIncrement > heightMap.Num() - 1 ? GetBlockHeight(heightMap, blockSize, x + 1, y + 2) - (blockSize * meshSimpleIncrement) : GetBlockHeight(heightMap, blockSize, x + 1 + meshSimpleIncrement, y + 1);
-			if (topHeight > bottomHeight) {
-				faceCount++;
-			}
-
-			bottomHeight = x < meshSimpleIncrement ? GetBlockHeight(heightMap, blockSize, x, y + 1) - (blockSize * meshSimpleIncrement) : GetBlockHeight(heightMap, blockSize, x + 1 - meshSimpleIncrement, y + 1);
-			if (topHeight > bottomHeight) {
-				faceCount++;
-			}
-
-			bottomHeight = y + 1 + meshSimpleIncrement > heightMap.Num() - 1 ? GetBlockHeight(heightMap, blockSize, x + 1, y + 2) - (blockSize * meshSimpleIncrement) : GetBlockHeight(heightMap, blockSize, x + 1, y + 1 + meshSimpleIncrement);
-			if (topHeight > bottomHeight) {
-				faceCount++;
-			}
-
-			bottomHeight = y < meshSimpleIncrement ? GetBlockHeight(heightMap, blockSize, x + 1, y) - (blockSize * meshSimpleIncrement) : bottomHeight = GetBlockHeight(heightMap, blockSize, x + 1, y + 1 - meshSimpleIncrement);
-			if (topHeight > bottomHeight) {
-				faceCount++;
-			}
-		}
-	}
-	faceCount += FMath::Square(verticesPerLine);
-	return faceCount;
 }
