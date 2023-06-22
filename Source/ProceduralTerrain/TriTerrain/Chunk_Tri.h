@@ -18,18 +18,17 @@ public:
 
 	bool HeightMapRecieved;
 
-	void Initialize(UMapThreading_Tri* mapThread, UMeshSettings_Tri* meshSettings, UHeightMapSettings_Tri* heightMapSettings, TArray<AChunk_Tri*>* visibleTerrainChunks, FVector2D coord, FVector2D& viewerPosition);
+	void Initialize(UMapThreading* mapThread, UMeshSettings_Tri* meshSettings, UHeightMapSettings_Tri* heightMapSettings, TArray<AChunk_Tri*>* visibleTerrainChunks, FVector2D coord, FVector2D& viewerPosition);
 	void UpdateChunk();
 	void OnHeightMapRecieved(UObject* heightMapObject);
 
 protected:
-	UMapThreading_Tri* MapThread;
+	UMapThreading* MapThread;
 	UProceduralMeshComponent* MeshObject;
 	UHeightMap_Tri* HeightMap;
 	UHeightMapSettings_Tri* HeightMapSettings;
 	UMeshSettings_Tri* MeshSettings;
 
-	FVector2D SampleCenter;
 	FVector2D* ViewerPosition;
 
 	TArray<AChunk_Tri*>* VisibleTerrainChunks;
@@ -42,4 +41,6 @@ protected:
 	void MakeMeshVisible(float viewerDistFromNearestChunk, bool shouldBeVisisble);
 	void SetLODMeshes(TArray<FLODInfo_Tri>& detailLevels);
 	void SetVisible(bool visible) { MeshObject->SetVisibility(visible); }
+	FVector2D ChunkPosition();
+	FVector2D SampleCenter();
 };

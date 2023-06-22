@@ -2,13 +2,13 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
-#include "NoiseMap_Block.h"
+#include "ProceduralTerrain/Terrain/NoiseMap.h"
 #include "HeightMapSettings_Block.generated.h"
 
-USTRUCT()
+USTRUCT(BlueprintType)
 struct FTerrainType_Block
 {
-	GENERATED_BODY()
+	GENERATED_USTRUCT_BODY()
 
 public:
 	UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "0.0", ClampMax = "1.0", UIMin = "0.0", UIMax = "1.0"))
@@ -17,16 +17,16 @@ public:
 		FColor Color;
 };
 
-UCLASS()
-class PROCEDURALTERRAIN_API UHeightMapSettings_Block : public UDataAsset
+UCLASS(BlueprintType)
+class PROCEDURALTERRAIN_API UHeightMapSettings_Block : public UPrimaryDataAsset
 {
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditDefaultsOnly)
-		FNoiseSettings_Block NoiseSettings;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+		FNoiseSettings NoiseSettings;
 
-	UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "1.0", UIMin = "1.0"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (ClampMin = "1.0", UIMin = "1.0"))
 		float HeightMultiplier = 300.f;
 	UPROPERTY(EditDefaultsOnly)
 		UCurveFloat* HeightCurve;

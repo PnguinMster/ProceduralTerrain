@@ -1,20 +1,20 @@
-#include "MapThreading_Tri.h"
+#include "MapThreading.h"
 #include "Async/Async.h"
 
-FThreadInfo_Tri::FThreadInfo_Tri(FDataRecieved* callback, UObject* parameter)
+FThreadInfo::FThreadInfo(FDataRecieved* callback, UObject* parameter)
 {
 	Callback = callback;
 	Parameter = parameter;
 }
 
-int UMapThreading_Tri::ChunkIterationPerTick = 3;
+int UMapThreading::ChunkIterationPerTick = 3;
 
-UMapThreading_Tri::UMapThreading_Tri()
+UMapThreading::UMapThreading()
 {
 	PrimaryComponentTick.bCanEverTick = true;
 }
 
-void UMapThreading_Tri::TickComponent(float deltaTime, ELevelTick tickType, FActorComponentTickFunction* thisTickFunction)
+void UMapThreading::TickComponent(float deltaTime, ELevelTick tickType, FActorComponentTickFunction* thisTickFunction)
 {
 	Super::TickComponent(deltaTime, tickType, thisTickFunction);
 
@@ -27,19 +27,19 @@ void UMapThreading_Tri::TickComponent(float deltaTime, ELevelTick tickType, FAct
 	}
 }
 
-void UMapThreading_Tri::IterateQueue()
+void UMapThreading::IterateQueue()
 {
-	FThreadInfo_Tri threadInfo;
+	FThreadInfo threadInfo;
 	DataQueue.Dequeue(threadInfo);
 	threadInfo.Callback->Execute(threadInfo.Parameter);
 }
 
-void UMapThreading_Tri::RequestData(TFunction<UObject* (void)> generateData, FDataRecieved* callback)
+void UMapThreading::RequestData(TFunction<UObject* (void)> generateData, FDataRecieved* callback)
 {
 	AsyncTask(ENamedThreads::AnyHiPriThreadHiPriTask, [generateData, callback, this]() {
 		UObject* data = generateData();
 		AsyncTask(ENamedThreads::GameThread, [callback, data, this]() {
-			DataQueue.Enqueue(FThreadInfo_Tri(callback, data));
+			DataQueue.Enqueue(FThreadInfo(callback, data));
+			});
 		});
-	});
 }

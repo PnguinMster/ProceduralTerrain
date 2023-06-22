@@ -2,12 +2,13 @@
 #include "TextureGenerator_Block.h"
 #include "HeightMapGenerator_Block.h"
 
-AChunk_Block::AChunk_Block() {
+AChunk_Block::AChunk_Block()
+{
 	MeshObject = CreateDefaultSubobject<UProceduralMeshComponent>(TEXT("Mesh"));
 	RootComponent = MeshObject;
 }
 
-void AChunk_Block::Initialize(UMapThreading_Block* mapThread, UMeshSettings_Block* meshSettings, UHeightMapSettings_Block* heightMapSettings, TArray<AChunk_Block*>* visibleTerrainChunks, FVector2D coord, FVector2D& viewerPosition)
+void AChunk_Block::Initialize(UMapThreading* mapThread, UMeshSettings_Block* meshSettings, UHeightMapSettings_Block* heightMapSettings, TArray<AChunk_Block*>* visibleTerrainChunks, FVector2D coord, FVector2D& viewerPosition)
 {
 	UpdateChunkDelegate.BindUObject(this, &AChunk_Block::UpdateChunk);
 	DataRecievedDelegate.BindUObject(this, &AChunk_Block::OnHeightMapRecieved);
@@ -19,10 +20,10 @@ void AChunk_Block::Initialize(UMapThreading_Block* mapThread, UMeshSettings_Bloc
 	VisibleTerrainChunks = visibleTerrainChunks;
 	ViewerPosition = &viewerPosition;
 
-	SetLODMeshes(MeshSettings->DetailLevels);
+	SetLODMeshes(meshSettings->DetailLevels);
 	SetVisible(false);
 
-	MeshObject->SetWorldLocation(ChunkPosition());
+	MeshObject->SetWorldLocation(FVector(ChunkPosition().X, ChunkPosition().Y, 0));
 
 	TFunction<UObject* (void)> function = [=]() {return HeightMapGenerator_Block::GenerateHeightMap(meshSettings->GetMeshVertsNum(), heightMapSettings, SampleCenter()); };
 	mapThread->RequestData(function, &DataRecievedDelegate);
@@ -33,10 +34,9 @@ void AChunk_Block::UpdateChunk()
 	if (!HeightMapRecieved)
 		return;
 
-	float maxViewDist = MeshSettings->DetailLevels[MeshSettings->DetailLevels.Num() - 1].ChunksVisible * MeshSettings->GetMeshWorldScale();
-	float viewerDistFromNearestChunk = FVector2D::Distance(FVector2D(ChunkPosition().X, ChunkPosition().Y), *ViewerPosition);
+	float maxViewDist = MeshSettings->DetailLevels[MeshSettings->DetailLevels.Num() - 1].ChunksVisible * MeshSettings->GetMeshWorldSize();
+	float viewerDistFromNearestChunk = FVector2D::Distance(FVector2D(GetActorLocation().X, GetActorLocation().Y), *ViewerPosition);
 	bool shouldBeVisible = viewerDistFromNearestChunk <= maxViewDist;
-
 	MakeMeshVisible(viewerDistFromNearestChunk, shouldBeVisible);
 
 	if (IsVisible() != shouldBeVisible) {
@@ -58,18 +58,19 @@ void AChunk_Block::OnHeightMapRecieved(UObject* heightMapObject)
 	UpdateChunk();
 }
 
-void AChunk_Block::MakeMeshVisible(float viewerDistFromNearestChunk, bool shouldBeVisisble)
+void AChunk_Block::MakeMeshVisible(float viewerDistFromNearestChunk, bool shouldBeVisible)
 {
-	if (!shouldBeVisisble)
+	if (!shouldBeVisible)
 		return;
 
 	int lodIndex = 0;
 	for (int i = 0; i < MeshSettings->DetailLevels.Num() - 1; i++) {
-		if (viewerDistFromNearestChunk > MeshSettings->DetailLevels[i].ChunksVisible * MeshSettings->GetMeshWorldScale())
+		if (viewerDistFromNearestChunk > MeshSettings->DetailLevels[i].ChunksVisible * MeshSettings->GetMeshWorldSize())
 			lodIndex = i + 1;
 		else
 			break;
 	}
+
 	if (lodIndex != PreviousLODIndex) {
 		ULODMesh_Block* lodMesh = LodMeshes[lodIndex];
 		lodMesh->Mesh->UpdateBounds();
@@ -91,12 +92,12 @@ void AChunk_Block::SetLODMeshes(TArray<FLODInfo_Block>& detailLevels)
 	}
 }
 
-FVector AChunk_Block::ChunkPosition()
+FVector2D AChunk_Block::ChunkPosition()
 {
-	return FVector(SampleCenter().X, SampleCenter().Y, 0) * MeshSettings->MeshScale * 2.f;
+	return Coord * MeshSettings->GetMeshWorldSize();
 }
 
 FVector2D AChunk_Block::SampleCenter()
 {
-	return Coord * MeshSettings->GetChunkSize();
+	return (MeshSettings->GetMeshVertsNum() - 2) * Coord;
 }

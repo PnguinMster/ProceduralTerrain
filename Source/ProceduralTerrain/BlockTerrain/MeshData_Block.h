@@ -1,7 +1,6 @@
 #pragma once
 
 #include "ProceduralMeshComponent.h"
-#include "MeshSettings_Block.h"
 #include "CoreMinimal.h"
 #include "MeshData_Block.generated.h"
 

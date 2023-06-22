@@ -7,9 +7,9 @@
 class PROCEDURALTERRAIN_API TextureGenerator_Tri
 {
 public:
-	static UMaterialInstanceDynamic* CreateMaterialInstance(UMeshSettings_Tri* meshSettings, UHeightMapSettings_Tri* heightMapSettings, UObject* inOuter);
+	static UMaterialInstanceDynamic* CreateMaterialInstance(UMeshSettings_Tri* meshSettings, UHeightMapSettings_Tri* heightMapSettings, UObject* inOuter, UHeightMap_Tri* heightMap);
 	static UTexture2D* ColorArrayToTexture(TArray<FColor> colors);
 	static UTexture2D* FloatArrayToTexture(TArray<float> convertArray);
 	static UTexture2D* TextureFromColorMap(TArray<uint8> colorMap, int width, int height);
-	static UTexture2D* TextureFromHeightMap(TArray<TArray<float>> heightMap);
+	//static UTexture2D* TextureFromHeightMap(TArray<TArray<float>> heightMap);
 };

@@ -1,10 +1,11 @@
 #include "TerrainGenerator_Block.h"
+#include "HeightMapGenerator_Block.h"
 
 ATerrainGenerator_Block::ATerrainGenerator_Block()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
-	MapThread = CreateDefaultSubobject<UMapThreading_Block>(TEXT("MapThreader"));
+	MapThread = CreateDefaultSubobject<UMapThreading>(TEXT("MapThreader"));
 }
 
 void ATerrainGenerator_Block::BeginPlay()
@@ -31,29 +32,27 @@ void ATerrainGenerator_Block::Tick(float deltaTime)
 
 void ATerrainGenerator_Block::UpdateVisibleChunks()
 {
-	TSet<FVector2D> updatedChunkCoord;
+	TSet<FVector2D> updatedChunkCoords;
 	for (int i = VisibleChunks.Num() - 1; i >= 0; i--) {
-		updatedChunkCoord.Add(VisibleChunks[i]->Coord);
+		updatedChunkCoords.Add(VisibleChunks[i]->Coord);
 		VisibleChunks[i]->UpdateChunk();
 	}
 
-	int currentChunkCoordX = FMath::RoundToInt(ViewerPosition.X / MeshSettings->GetMeshWorldScale());
-	int currentChunkCoordY = FMath::RoundToInt(ViewerPosition.Y / MeshSettings->GetMeshWorldScale());
+	int currentChunkCoordX = FMath::RoundToInt(ViewerPosition.X / MeshSettings->GetMeshWorldSize());
+	int currentChunkCoordY = FMath::RoundToInt(ViewerPosition.Y / MeshSettings->GetMeshWorldSize());
 
-	//Update Chunk Visibility
 	for (int yOffset = -ChunksVisibleInView; yOffset <= ChunksVisibleInView; yOffset++) {
 		for (int xOffset = -ChunksVisibleInView; xOffset <= ChunksVisibleInView; xOffset++) {
 			FVector2D viewedChunkCoord = FVector2D(currentChunkCoordX + xOffset, currentChunkCoordY + yOffset);
 
-			if (updatedChunkCoord.Contains(viewedChunkCoord))
+			if (updatedChunkCoords.Contains(viewedChunkCoord))
 				continue;
 
 			if (ChunkMap.Contains(viewedChunkCoord))
 				ChunkMap[viewedChunkCoord]->UpdateChunk();
 
-			if (!ChunkMap.Contains(viewedChunkCoord)) {
+			if (!ChunkMap.Contains(viewedChunkCoord))
 				CreateChunk(viewedChunkCoord);
-			}
 		}
 	}
 }

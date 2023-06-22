@@ -2,12 +2,13 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
-#include "NoiseMap_Tri.h"
+#include "ProceduralTerrain/Terrain/NoiseMap.h"
 #include "HeightMapSettings_Tri.generated.h"
 
-USTRUCT()
-struct FTerrainType_Tri {
-	GENERATED_BODY()
+USTRUCT(BlueprintType)
+struct FTerrainType_Tri 
+{
+	GENERATED_USTRUCT_BODY()
 
 	UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "0.0", ClampMax = "1.0", UIMin = "0.0", UIMax = "1.0"))
 		float Height;
@@ -17,24 +18,21 @@ struct FTerrainType_Tri {
 		FColor Color;
 };
 
-UCLASS()
-class PROCEDURALTERRAIN_API UHeightMapSettings_Tri : public UDataAsset
+UCLASS(BlueprintType)
+class PROCEDURALTERRAIN_API UHeightMapSettings_Tri : public UPrimaryDataAsset
 {
 	GENERATED_BODY()
 	
 public:
-	UPROPERTY(EditDefaultsOnly)
-	FNoiseSettings_Tri NoiseSettings;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	FNoiseSettings NoiseSettings;
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (ClampMin = "1.0", UIMin = "1.0"))
 		float HeightMultiplier = 300.f;
 	UPROPERTY(EditDefaultsOnly)
 		UCurveFloat* HeightCurve;
 	UPROPERTY(EditDefaultsOnly)
 		TArray<FTerrainType_Tri> Regions;
-
-	float GetMinHeight();
-	float GetMaxHeight();
 };
 
 UCLASS()

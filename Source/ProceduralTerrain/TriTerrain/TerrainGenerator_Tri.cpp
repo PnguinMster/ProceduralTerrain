@@ -5,7 +5,7 @@ ATerrainGenerator_Tri::ATerrainGenerator_Tri()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
-	MapThread = CreateDefaultSubobject<UMapThreading_Tri>(TEXT("MapThreader"));
+	MapThread = CreateDefaultSubobject<UMapThreading>(TEXT("MapThreader"));
 }
 
 void ATerrainGenerator_Tri::BeginPlay()
@@ -65,7 +65,6 @@ void ATerrainGenerator_Tri::CreateChunk(FVector2D& viewedChunkCoord)
 	chunk->Initialize(MapThread, MeshSettings, HeightMapSettings, &VisibleChunks, viewedChunkCoord, ViewerPosition);
 
 	ChunkMap.Add(viewedChunkCoord, chunk);
-
 	chunk->FinishSpawning(SpawnLocAndRotation);
 	chunk->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
 }

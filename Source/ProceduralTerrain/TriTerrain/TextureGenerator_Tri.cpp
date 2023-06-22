@@ -1,7 +1,7 @@
 #include "TextureGenerator_Tri.h"
 #include "Kismet/KismetMathLibrary.h"
 
-UMaterialInstanceDynamic* TextureGenerator_Tri::CreateMaterialInstance(UMeshSettings_Tri* meshSettings, UHeightMapSettings_Tri* heightMapSettings, UObject* inOuter)
+UMaterialInstanceDynamic* TextureGenerator_Tri::CreateMaterialInstance(UMeshSettings_Tri* meshSettings, UHeightMapSettings_Tri* heightMapSettings, UObject* inOuter, UHeightMap_Tri* heightMap)
 {
 	int regionsCount = heightMapSettings->Regions.Num();
 
@@ -24,8 +24,8 @@ UMaterialInstanceDynamic* TextureGenerator_Tri::CreateMaterialInstance(UMeshSett
 	UTexture2D* blendTexture = FloatArrayToTexture(blends);
 
 	UMaterialInstanceDynamic* dynamicMaterialInstance = UMaterialInstanceDynamic::Create(meshSettings->MaterialInterface, inOuter);
-	dynamicMaterialInstance->SetScalarParameterValue("MinHeight", heightMapSettings->GetMinHeight());
-	dynamicMaterialInstance->SetScalarParameterValue("MaxHeight", heightMapSettings->GetMaxHeight());
+	dynamicMaterialInstance->SetScalarParameterValue("MinHeight", heightMap->MinValue);
+	dynamicMaterialInstance->SetScalarParameterValue("MaxHeight", heightMap->MaxValue);
 	dynamicMaterialInstance->SetScalarParameterValue("RegionCount", regionsCount);
 	dynamicMaterialInstance->SetTextureParameterValue("ColorTexture", colorTexture);
 	dynamicMaterialInstance->SetTextureParameterValue("HeightTexture", heightTexture);
@@ -52,7 +52,7 @@ UTexture2D* TextureGenerator_Tri::TextureFromColorMap(TArray<uint8> colorMap, in
 	texture->UpdateResource();
 	return texture;
 }
-
+/*
 UTexture2D* TextureGenerator_Tri::TextureFromHeightMap(TArray<TArray<float>> heightMap)
 {
 	int width = heightMap.Num();
@@ -74,6 +74,7 @@ UTexture2D* TextureGenerator_Tri::TextureFromHeightMap(TArray<TArray<float>> hei
 	}
 	return TextureFromColorMap(colorMap, width, height);
 }
+*/
 
 UTexture2D* TextureGenerator_Tri::ColorArrayToTexture(TArray<FColor> colors)
 {

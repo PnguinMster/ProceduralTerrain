@@ -1,4 +1,5 @@
 #include "TextureGenerator_Block.h"
+#include "Kismet/KismetMathLibrary.h"
 
 UTexture2D* TextureGenerator_Block::TextureFromColorMap(TArray<uint8> colorMap, int width, int height)
 {
@@ -20,7 +21,8 @@ UTexture2D* TextureGenerator_Block::TextureFromColorMap(TArray<uint8> colorMap, 
 	return texture;
 }
 
-UTexture2D* TextureGenerator_Block::TextureFromHeightMap(TArray<TArray<float>> heightMap, float heightMultiplier)
+/*
+UTexture2D* TextureGenerator_Block::TextureFromHeightMap(TArray<TArray<float>> heightMap)
 {
 	int width = heightMap.Num() - 2;
 	int height = heightMap[0].Num() - 2;
@@ -31,7 +33,7 @@ UTexture2D* TextureGenerator_Block::TextureFromHeightMap(TArray<TArray<float>> h
 	//Add Perlin Noise Pixel to Texture
 	for (int y = 0; y < height; y++) {
 		for (int x = 0; x < width; x++) {
-			FColor color = UKismetMathLibrary::LinearColorLerp(FLinearColor::Black, FLinearColor::White, heightMap[x + 1][y + 1] / heightMultiplier).ToFColor(true);
+			FColor color = UKismetMathLibrary::LinearColorLerp(FLinearColor::Black, FLinearColor::White, heightMap[x + 1][y + 1]).ToFColor(true);
 			int currentPixelIndex = y * width + x;
 			colorMap[4 * currentPixelIndex] = color.B;
 			colorMap[4 * currentPixelIndex + 1] = color.G;
@@ -41,16 +43,17 @@ UTexture2D* TextureGenerator_Block::TextureFromHeightMap(TArray<TArray<float>> h
 	}
 	return TextureFromColorMap(colorMap, width, height);
 }
+*/
 
 UMaterialInstanceDynamic* TextureGenerator_Block::CreateMaterialInstance(UHeightMap_Block* heightMap, UMeshSettings_Block* meshSettings, UObject* inOuter)
 {
-	UTexture2D* texture = TextureGenerator_Block::TextureFromColorMap(heightMap->Color, meshSettings->GetChunkSize(), meshSettings->GetChunkSize());
+	UTexture2D* texture = TextureGenerator_Block::TextureFromColorMap(heightMap->Color, meshSettings->GetMeshVertsNum() - 2, meshSettings->GetMeshVertsNum() - 2);
 	UMaterialInstanceDynamic* dynamicMaterialInstance = UMaterialInstanceDynamic::Create(meshSettings->MaterialInterface, inOuter);
 	dynamicMaterialInstance->SetTextureParameterValue("ChunkTexture", texture);
 	return dynamicMaterialInstance;
 }
 
-TArray<uint8> TextureGenerator_Block::GenerateColorMap(TArray<TArray<float>> values, TArray<FTerrainType_Block>* regions, float chunkSize)
+TArray<uint8> TextureGenerator_Block::GenerateColorMap(TArray<TArray<float>> values, TArray<FTerrainType_Block>* regions, float heightMultiplier)
 {
 	int width = values.Num() - 2;
 	int height = values[0].Num() - 2;
@@ -64,8 +67,8 @@ TArray<uint8> TextureGenerator_Block::GenerateColorMap(TArray<TArray<float>> val
 			float currentHeight = values[x + 1][y + 1];
 
 			for (int i = 0; i < regions->Num(); i++) {
-				if (currentHeight >= (*regions)[i].Height * chunkSize) {
-					int currentPixelIndex = y * height + x;
+				if (currentHeight >= (*regions)[i].Height * heightMultiplier) {
+					int currentPixelIndex = y * width + x;
 					colorMap[4 * currentPixelIndex] = (*regions)[i].Color.B;
 					colorMap[4 * currentPixelIndex + 1] = (*regions)[i].Color.G;
 					colorMap[4 * currentPixelIndex + 2] = (*regions)[i].Color.R;

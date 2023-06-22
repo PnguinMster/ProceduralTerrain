@@ -44,14 +44,15 @@ int MeshGenerator_Block::MeshFaceCount(TArray<TArray<float>>& heightMap, int blo
 
 void MeshGenerator_Block::CreateFace(UMeshData_Block* meshData, EFaceSide side, TArray<TArray<float>>& heightMap, int blockSize, int meshSimpleIncrement, int x, int y)
 {
+	int halfExtent = blockSize * 0.5f;
 	int meshSize = heightMap.Num() - 2;
 	int verticesPerLine = (meshSize - 1) / meshSimpleIncrement + 1;
 	int topHeight = GetBlockHeight(heightMap, blockSize, x + 1, y + 1);
 	int bottomHeight = GetBottomHeight(side, heightMap, blockSize, meshSimpleIncrement, x, y);
 
-	float topLeft = ((meshSize - 1) * -blockSize) + (blockSize * meshSimpleIncrement);
-	float faceSize = blockSize * meshSimpleIncrement;
-	float spacing = blockSize * 2.f;
+	float topLeft = ((meshSize - 1) * -halfExtent) + (halfExtent * meshSimpleIncrement);
+	float faceSize = halfExtent * meshSimpleIncrement;
+	float spacing = blockSize;
 
 	FVector2D facePosition = FVector2D(spacing * x + topLeft, spacing * y + topLeft);
 
@@ -67,7 +68,7 @@ void MeshGenerator_Block::CreateFace(UMeshData_Block* meshData, EFaceSide side, 
 
 int MeshGenerator_Block::GetBottomHeight(EFaceSide side, TArray<TArray<float>>& heightMap, int blockSize, int meshSimpleIncrement, int x, int y)
 {
-	int heightOffset = (blockSize * 2) * meshSimpleIncrement;
+	int heightOffset = (blockSize)*meshSimpleIncrement;
 
 	switch (side)
 	{
@@ -102,8 +103,8 @@ int MeshGenerator_Block::GetBottomHeight(EFaceSide side, TArray<TArray<float>>& 
 
 int MeshGenerator_Block::GetBlockHeight(TArray<TArray<float>>& heightMap, int blockSize, int x, int y)
 {
-	int blockClamp = blockSize + (heightMap[x][y] * blockSize);
-	blockClamp -= (blockClamp % (blockSize * 2));
+	int blockClamp = heightMap[x][y] * blockSize;
+	blockClamp -= blockClamp % blockSize;
 
 	return blockClamp;
 }

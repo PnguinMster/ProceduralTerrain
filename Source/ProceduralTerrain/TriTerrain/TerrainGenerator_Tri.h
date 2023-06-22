@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Chunk_Tri.h"
-#include "MapThreading_Tri.h"
+#include "ProceduralTerrain/Terrain/MapThreading.h"
 #include "HeightMapSettings_Tri.h"
 #include "MeshGenerator_Tri.h"
 #include "MeshSettings_Tri.h"
@@ -34,7 +34,7 @@ protected:
 	TMap<FVector2D, AChunk_Tri*> ChunkMap;
 	TArray<AChunk_Tri*> VisibleChunks;
 
-	UMapThreading_Tri* MapThread;
+	UMapThreading* MapThread;
 	APawn* ViewerPawn;
 
 	FVector2D ViewerPosition;

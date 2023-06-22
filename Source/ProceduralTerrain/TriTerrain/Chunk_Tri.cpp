@@ -8,7 +8,7 @@ AChunk_Tri::AChunk_Tri()
 	RootComponent = MeshObject;
 }
 
-void AChunk_Tri::Initialize(UMapThreading_Tri* mapThread, UMeshSettings_Tri* meshSettings, UHeightMapSettings_Tri* heightMapSettings, TArray<AChunk_Tri*>* visibleTerrainChunks, FVector2D coord, FVector2D& viewerPosition)
+void AChunk_Tri::Initialize(UMapThreading* mapThread, UMeshSettings_Tri* meshSettings, UHeightMapSettings_Tri* heightMapSettings, TArray<AChunk_Tri*>* visibleTerrainChunks, FVector2D coord, FVector2D& viewerPosition)
 {
 	UpdateChunkDelegate.BindUObject(this, &AChunk_Tri::UpdateChunk);
 	DataRecievedDelegate.BindUObject(this, &AChunk_Tri::OnHeightMapRecieved);
@@ -20,16 +20,12 @@ void AChunk_Tri::Initialize(UMapThreading_Tri* mapThread, UMeshSettings_Tri* mes
 	VisibleTerrainChunks = visibleTerrainChunks;
 	ViewerPosition = &viewerPosition;
 
-	FVector2D chunkPosition = coord * meshSettings->GetMeshWorldSize();
-	SampleCenter = chunkPosition / meshSettings->MeshScale;
-
 	SetLODMeshes(meshSettings->DetailLevels);
 	SetVisible(false);
 
-	MeshObject->SetWorldLocation(FVector(chunkPosition.X, chunkPosition.Y, 0));
-	MeshObject->SetMaterial(0, TextureGenerator_Tri::CreateMaterialInstance(meshSettings, heightMapSettings, this));
+	MeshObject->SetWorldLocation(FVector(ChunkPosition().X, ChunkPosition().Y, 0));
 
-	TFunction<UObject* (void)> function = [=]() {return HeightMapGenerator_Tri::GenerateHeightMap(meshSettings->GetNumberVerticesPerLine(), meshSettings->GetNumberVerticesPerLine(), heightMapSettings, SampleCenter); };
+	TFunction<UObject* (void)> function = [=]() {return HeightMapGenerator_Tri::GenerateHeightMap(meshSettings->GetNumberVerticesPerLine(), meshSettings->GetNumberVerticesPerLine(), heightMapSettings, SampleCenter(), meshSettings->MeshScale); };
 	mapThread->RequestData(function, &DataRecievedDelegate);
 }
 
@@ -57,6 +53,7 @@ void AChunk_Tri::OnHeightMapRecieved(UObject* heightMapObject)
 {
 	HeightMap = Cast<UHeightMap_Tri>(heightMapObject);
 	HeightMapRecieved = true;
+	MeshObject->SetMaterial(0, TextureGenerator_Tri::CreateMaterialInstance(MeshSettings, HeightMapSettings, this, HeightMap));
 
 	UpdateChunk();
 }
@@ -92,4 +89,14 @@ void AChunk_Tri::SetLODMeshes(TArray<FLODInfo_Tri>& detailLevels)
 		LodMeshes[i] = NewObject<ULODMesh_Tri>();
 		LodMeshes[i]->Initialize(detailLevels[i].Lod, &UpdateChunkDelegate);
 	}
+}
+
+FVector2D AChunk_Tri::ChunkPosition()
+{
+	return Coord * MeshSettings->GetMeshWorldSize();
+}
+
+FVector2D AChunk_Tri::SampleCenter()
+{
+	return ChunkPosition() / MeshSettings->MeshScale;
 }

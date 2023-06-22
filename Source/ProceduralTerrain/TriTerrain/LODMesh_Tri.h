@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "MapThreading_Tri.h"
+#include "ProceduralTerrain/Terrain/MapThreading.h"
 #include "ProceduralMeshComponent.h"
 #include "HeightMapSettings_Tri.h"
 #include "MeshSettings_Tri.h"
@@ -27,5 +27,5 @@ public:
 	ULODMesh_Tri();
 	void Initialize(int lod, FVoidDelegate* updateCallback);
 	void OnMeshDataRecieved(UObject* meshDataObject);
-	void RequestMesh(UHeightMap_Tri* heightMap, UMeshSettings_Tri* meshSettings, UMapThreading_Tri* mapThread);
+	void RequestMesh(UHeightMap_Tri* heightMap, UMeshSettings_Tri* meshSettings, UMapThreading* mapThread);
 };

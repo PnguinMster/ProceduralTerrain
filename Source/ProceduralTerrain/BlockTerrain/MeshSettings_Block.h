@@ -7,7 +7,7 @@
 USTRUCT(BlueprintType)
 struct FLODInfo_Block
 {
-	GENERATED_BODY()
+	GENERATED_USTRUCT_BODY()
 
 public:
 	UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "1.0", UIMin = "1.0"))
@@ -16,16 +16,16 @@ public:
 		int Lod;
 };
 
-UCLASS()
-class PROCEDURALTERRAIN_API UMeshSettings_Block : public UDataAsset
+UCLASS(BlueprintType)
+class PROCEDURALTERRAIN_API UMeshSettings_Block : public UPrimaryDataAsset
 {
 	GENERATED_BODY()
 
 		static const int SupportedChunkSizes[9];
 
 public:
-	UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "1.0", UIMin = "1.0"))
-		float MeshScale = 10.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "1.0", UIMin = "1.0"))
+		float MeshScale = 70.f;
 	/**
 	0 = 48
 	1 = 72
@@ -37,14 +37,13 @@ public:
 	7 = 216
 	8 = 240
 	*/
-	UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "0.0", ClampMax = "8.0", UIMin = "0.0", UIMax = "8.0"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (ClampMin = "0.0", ClampMax = "8.0", UIMin = "0.0", UIMax = "8.0"))
 		int ChunkSizeIndex = 0;
 	UPROPERTY(EditDefaultsOnly)
 		TArray<FLODInfo_Block> DetailLevels;
 	UPROPERTY(EditDefaultsOnly)
 		UMaterialInterface* MaterialInterface;
 
-	float GetMeshWorldScale();
+	float GetMeshWorldSize();
 	float GetMeshVertsNum();
-	float GetChunkSize();
 };

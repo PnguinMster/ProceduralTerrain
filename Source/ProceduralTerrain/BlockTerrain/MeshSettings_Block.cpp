@@ -2,17 +2,12 @@
 
 const int UMeshSettings_Block::SupportedChunkSizes[9]{ 48,72,96,120,144,168,192,216,240 };
 
-float UMeshSettings_Block::GetMeshWorldScale()
+float UMeshSettings_Block::GetMeshWorldSize()
 {
-	return MeshScale * GetChunkSize() * 2.f;
+	return (GetMeshVertsNum() - 2) * MeshScale;
 }
 
 float UMeshSettings_Block::GetMeshVertsNum()
 {
-	return GetChunkSize() + 2;
-}
-
-float UMeshSettings_Block::GetChunkSize()
-{
-	return SupportedChunkSizes[ChunkSizeIndex];
+	return SupportedChunkSizes[ChunkSizeIndex] + 2;
 }

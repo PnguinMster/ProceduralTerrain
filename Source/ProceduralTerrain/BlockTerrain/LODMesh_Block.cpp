@@ -21,7 +21,7 @@ void ULODMesh_Block::OnMeshDataReceived(UObject* meshDataObject)
 	UpdateCallback->Execute();
 }
 
-void ULODMesh_Block::RequestMesh(UHeightMap_Block* heightMap, UMeshSettings_Block* meshSettings, UMapThreading_Block* mapThread)
+void ULODMesh_Block::RequestMesh(UHeightMap_Block* heightMap, UMeshSettings_Block* meshSettings, UMapThreading* mapThread)
 {
 	TFunction<UObject* (void)> function = [=]() { return MeshGenerator_Block::GenerateTerrainMesh(heightMap->Values, meshSettings->MeshScale, Lod); };
 	HasRequestedMesh = true;
